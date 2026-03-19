@@ -1,0 +1,5 @@
+{
+  "name": "Morning Altar",
+  "description": "A premium daily Christian devotional and discipline app designed to help you start your day with God before the noise of the world.",
+  "requestFramePermissions": ["microphone", "notifications"]
+}
