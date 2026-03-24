@@ -16,9 +16,9 @@ const REWARD_ITEMS = [
     description: 'Stay connected with 1GB of mobile data.',
     pointsCost: 500,
     icon: Wifi,
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500/20'
+    color: 'text-theme-accent',
+    bg: 'bg-theme-accent/10',
+    border: 'border-theme-accent/20'
   },
   {
     id: 'provisions_pack',
@@ -26,9 +26,9 @@ const REWARD_ITEMS = [
     description: 'A small pack of daily essentials.',
     pointsCost: 1000,
     icon: ShoppingBag,
-    color: 'text-amber-500',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20'
+    color: 'text-theme-accent',
+    bg: 'bg-theme-accent/10',
+    border: 'border-theme-accent/20'
   },
   {
     id: 'coffee_voucher',
@@ -36,9 +36,9 @@ const REWARD_ITEMS = [
     description: 'Redeemable at participating cafes.',
     pointsCost: 500,
     icon: Coffee,
-    color: 'text-orange-500',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/20'
+    color: 'text-theme-accent',
+    bg: 'bg-theme-accent/10',
+    border: 'border-theme-accent/20'
   }
 ];
 
@@ -71,51 +71,51 @@ export function Rewards({ userData, onClose, onUpdateUserData }: RewardsProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex flex-col">
+    <div className="fixed inset-0 bg-theme-bg/90 backdrop-blur-sm z-[100] flex flex-col">
       <motion.div 
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
-        className="flex-1 flex flex-col max-w-md mx-auto w-full bg-zinc-950"
+        className="flex-1 flex flex-col max-w-md mx-auto w-full bg-theme-bg"
       >
-        <header className="p-6 flex items-center justify-between border-b border-zinc-800 sticky top-0 bg-zinc-950/80 backdrop-blur-md z-10">
+        <header className="p-6 flex items-center justify-between border-b border-theme-border sticky top-0 bg-theme-bg/80 backdrop-blur-md z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-              <Gift className="w-5 h-5 text-amber-500" />
+            <div className="w-10 h-10 rounded-full bg-theme-accent/10 flex items-center justify-center">
+              <Gift className="w-5 h-5 text-theme-accent" />
             </div>
-            <h2 className="text-xl font-bold text-white">Royalty Rewards</h2>
+            <h2 className="text-xl font-bold text-theme-text">Royalty Rewards</h2>
           </div>
           <button 
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center hover:bg-zinc-800 transition-colors"
+            className="w-10 h-10 rounded-full bg-theme-card flex items-center justify-center hover:opacity-80 transition-colors"
           >
-            <X className="w-5 h-5 text-zinc-400" />
+            <X className="w-5 h-5 text-theme-muted" />
           </button>
         </header>
 
         <div className="flex-1 overflow-y-auto p-6 pb-32">
           {/* Points Balance Card */}
-          <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-8 rounded-[2rem] mb-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl -mr-10 -mt-10" />
+          <div className="bg-gradient-to-br from-theme-card to-theme-bg border border-theme-border p-8 rounded-[2rem] mb-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-theme-accent/5 rounded-full blur-3xl -mr-10 -mt-10" />
             
-            <p className="text-zinc-400 text-sm font-medium uppercase tracking-widest mb-2">Your Streak Points</p>
+            <p className="text-theme-muted text-sm font-medium uppercase tracking-widest mb-2">Your Streak Points</p>
             <div className="flex items-end gap-3 mb-6">
-              <h3 className="text-5xl font-bold text-white tracking-tighter">{points}</h3>
-              <p className="text-amber-500 font-bold mb-1">≈ ${dollarValue}</p>
+              <h3 className="text-5xl font-bold text-theme-text tracking-tighter">{points}</h3>
+              <p className="text-theme-accent font-bold mb-1">≈ ${dollarValue}</p>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-zinc-500">Progress to Minimum Redemption ($5)</span>
-                <span className="text-zinc-300">{Math.round(progressToMin)}%</span>
+                <span className="text-theme-muted">Progress to Minimum Redemption ($5)</span>
+                <span className="text-theme-text/80">{Math.round(progressToMin)}%</span>
               </div>
-              <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-theme-border rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-amber-500 rounded-full transition-all duration-1000 ease-out" 
+                  className="h-full bg-theme-accent rounded-full transition-all duration-1000 ease-out" 
                   style={{ width: `${progressToMin}%` }}
                 />
               </div>
-              <p className="text-[10px] text-zinc-500 text-right">
+              <p className="text-[10px] text-theme-muted text-right">
                 {points < MIN_REDEMPTION_POINTS 
                   ? `${MIN_REDEMPTION_POINTS - points} points away` 
                   : 'Eligible for redemption!'}
@@ -124,10 +124,10 @@ export function Rewards({ userData, onClose, onUpdateUserData }: RewardsProps) {
           </div>
 
           {/* Info Banner */}
-          <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl mb-8 flex gap-3 items-start">
-            <Gift className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div className="bg-theme-accent/10 border border-theme-accent/20 p-4 rounded-2xl mb-8 flex gap-3 items-start">
+            <Gift className="w-5 h-5 text-theme-accent flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm text-amber-500/90 font-medium leading-relaxed">
+              <p className="text-sm text-theme-accent/90 font-medium leading-relaxed">
                 Maintain your daily streak to earn points! 100 days streak point is equivalent to $1.00. 
                 A 1-year streak rewards you with bonus points.
               </p>
@@ -138,14 +138,14 @@ export function Rewards({ userData, onClose, onUpdateUserData }: RewardsProps) {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-green-500/10 border border-green-500/20 p-4 rounded-2xl mb-8 flex gap-3 items-center"
+              className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl mb-8 flex gap-3 items-center"
             >
-              <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-              <p className="text-sm text-green-500 font-medium">{successMessage}</p>
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+              <p className="text-sm text-emerald-500 font-medium">{successMessage}</p>
             </motion.div>
           )}
 
-          <h3 className="text-lg font-bold text-white mb-4">Redeem Rewards</h3>
+          <h3 className="text-lg font-bold text-theme-text mb-4">Redeem Rewards</h3>
           
           <div className="space-y-4">
             {REWARD_ITEMS.map(item => {
@@ -159,8 +159,8 @@ export function Rewards({ userData, onClose, onUpdateUserData }: RewardsProps) {
                   key={item.id}
                   className={`p-5 rounded-3xl border transition-all ${
                     canRedeem 
-                      ? 'bg-zinc-900/80 border-zinc-800 hover:border-amber-500/30' 
-                      : 'bg-zinc-900/30 border-zinc-800/50 opacity-75'
+                      ? 'bg-theme-card/80 border-theme-border hover:border-theme-accent/30' 
+                      : 'bg-theme-card/30 border-theme-border/50 opacity-75'
                   }`}
                 >
                   <div className="flex gap-4 items-center">
@@ -168,12 +168,12 @@ export function Rewards({ userData, onClose, onUpdateUserData }: RewardsProps) {
                       <item.icon className={`w-6 h-6 ${item.color}`} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-zinc-200">{item.title}</h4>
-                      <p className="text-xs text-zinc-500 mt-1">{item.description}</p>
+                      <h4 className="font-bold text-theme-text/90">{item.title}</h4>
+                      <p className="text-xs text-theme-muted mt-1">{item.description}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-amber-500">{item.pointsCost} pts</p>
-                      <p className="text-[10px] text-zinc-500">≈ ${(item.pointsCost * DOLLARS_PER_POINT).toFixed(2)}</p>
+                      <p className="font-bold text-theme-accent">{item.pointsCost} pts</p>
+                      <p className="text-[10px] text-theme-muted">≈ ${(item.pointsCost * DOLLARS_PER_POINT).toFixed(2)}</p>
                     </div>
                   </div>
 
@@ -182,10 +182,10 @@ export function Rewards({ userData, onClose, onUpdateUserData }: RewardsProps) {
                     disabled={!canRedeem || isRedeeming}
                     className={`w-full mt-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                       isRedeeming
-                        ? 'bg-amber-500/50 text-black cursor-wait'
+                        ? 'bg-theme-accent/50 text-theme-bg cursor-wait'
                         : canRedeem
-                        ? 'bg-zinc-800 text-white hover:bg-zinc-700'
-                        : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'
+                        ? 'bg-theme-card text-theme-text hover:opacity-80'
+                        : 'bg-theme-card/50 text-theme-muted cursor-not-allowed'
                     }`}
                   >
                     {isRedeeming ? (

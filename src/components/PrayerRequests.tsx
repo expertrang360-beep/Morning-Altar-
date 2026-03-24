@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Plus, CheckCircle2, Circle, Trash2 } from 'lucide-react';
+import { Heart, Plus, CheckCircle2, Circle, Trash2, Calendar } from 'lucide-react';
 import { UserData, PrayerRequest } from '../types';
 
 interface PrayerRequestsProps {
@@ -10,6 +10,7 @@ interface PrayerRequestsProps {
 
 export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsProps) {
   const [newRequest, setNewRequest] = useState('');
+  const [newDueDate, setNewDueDate] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,13 +37,15 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
       id: crypto.randomUUID(),
       text: trimmedRequest,
       createdAt: new Date().toISOString(),
-      isAnswered: false
+      isAnswered: false,
+      dueDate: newDueDate || undefined
     };
 
     onUpdateUserData({
       prayerRequests: [request, ...(userData.prayerRequests || [])]
     });
     setNewRequest('');
+    setNewDueDate('');
     setError(null);
     setIsAdding(false);
   };
@@ -71,12 +74,12 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
   return (
     <section className="mb-12">
       <div className="flex justify-between items-center mb-4 px-1">
-        <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+        <h3 className="text-sm font-bold text-theme-muted uppercase tracking-widest flex items-center gap-2">
           <Heart className="w-4 h-4" /> Prayer Requests
         </h3>
         <button 
           onClick={() => setIsAdding(!isAdding)}
-          className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 hover:bg-amber-500/20 transition-colors"
+          className="w-8 h-8 rounded-full bg-theme-accent/10 flex items-center justify-center text-theme-accent hover:bg-theme-accent/20 transition-colors"
         >
           <Plus className={`w-4 h-4 transition-transform ${isAdding ? 'rotate-45' : ''}`} />
         </button>
@@ -92,19 +95,28 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
             className="mb-4 overflow-hidden"
           >
             <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                value={newRequest}
+                onChange={handleInputChange}
+                placeholder="What are you praying for?"
+                className={`w-full bg-theme-card/50 border ${error ? 'border-red-500/50 focus:border-red-500' : 'border-theme-border focus:border-theme-accent/50'} rounded-2xl py-3 px-4 text-theme-text focus:outline-none transition-colors text-sm`}
+                autoFocus
+              />
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newRequest}
-                  onChange={handleInputChange}
-                  placeholder="What are you praying for?"
-                  className={`flex-1 bg-zinc-900/50 border ${error ? 'border-red-500/50 focus:border-red-500' : 'border-zinc-800 focus:border-amber-500/50'} rounded-2xl py-3 px-4 text-zinc-200 focus:outline-none transition-colors text-sm`}
-                  autoFocus
-                />
+                <div className="relative flex-1">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+                  <input
+                    type="date"
+                    value={newDueDate}
+                    onChange={(e) => setNewDueDate(e.target.value)}
+                    className="w-full bg-theme-card/50 border border-theme-border focus:border-theme-accent/50 rounded-2xl py-3 pl-10 pr-4 text-theme-muted focus:outline-none transition-colors text-sm"
+                  />
+                </div>
                 <button 
                   type="submit"
                   disabled={!newRequest.trim()}
-                  className="bg-amber-500 text-black px-4 rounded-2xl font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-theme-accent text-theme-bg px-6 rounded-2xl font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add
                 </button>
@@ -119,11 +131,11 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
 
       <div className="space-y-3">
         {activeRequests.length === 0 && answeredRequests.length === 0 && !isAdding && (
-          <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-3xl text-center">
-            <p className="text-zinc-500 text-sm">No prayer requests yet.</p>
+          <div className="bg-theme-card/50 border border-theme-border p-6 rounded-3xl text-center">
+            <p className="text-theme-muted text-sm">No prayer requests yet.</p>
             <button 
               onClick={() => setIsAdding(true)}
-              className="text-amber-500 text-sm font-bold mt-2 hover:underline"
+              className="text-theme-accent text-sm font-bold mt-2 hover:underline"
             >
               Add your first request
             </button>
@@ -137,18 +149,25 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-zinc-900/80 border border-zinc-800 p-4 rounded-2xl flex items-center gap-3 group"
+              className="bg-theme-card/80 border border-theme-border p-4 rounded-2xl flex items-center gap-3 group"
             >
               <button 
                 onClick={() => toggleAnswered(req.id)}
-                className="flex-shrink-0 text-zinc-500 hover:text-amber-500 transition-colors"
+                className="flex-shrink-0 text-theme-muted hover:text-theme-accent transition-colors"
               >
                 <Circle className="w-6 h-6" />
               </button>
-              <p className="flex-1 text-sm text-zinc-200">{req.text}</p>
+              <div className="flex-1">
+                <p className="text-sm text-theme-text/90">{req.text}</p>
+                {req.dueDate && (
+                  <p className="text-xs text-theme-accent/80 mt-1 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" /> Due: {new Date(req.dueDate).toLocaleDateString(undefined, { timeZone: 'UTC' })}
+                  </p>
+                )}
+              </div>
               <button 
                 onClick={() => deleteRequest(req.id)}
-                className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-500 transition-all"
+                className="opacity-0 group-hover:opacity-100 text-theme-muted/60 hover:text-theme-accent transition-all"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -157,7 +176,7 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
 
           {answeredRequests.length > 0 && (
             <motion.div layout className="pt-4">
-              <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest mb-3 px-1">Answered Prayers</p>
+              <p className="text-xs font-bold text-theme-muted uppercase tracking-widest mb-3 px-1">Answered Prayers</p>
               <div className="space-y-3">
                 {answeredRequests.map(req => (
                   <motion.div
@@ -165,18 +184,25 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-zinc-900/30 border border-zinc-800/50 p-4 rounded-2xl flex items-center gap-3 group"
+                    className="bg-theme-card/30 border border-theme-border/50 p-4 rounded-2xl flex items-center gap-3 group"
                   >
                     <button 
                       onClick={() => toggleAnswered(req.id)}
-                      className="flex-shrink-0 text-emerald-500 hover:text-zinc-500 transition-colors"
+                      className="flex-shrink-0 text-emerald-500 hover:text-theme-muted transition-colors"
                     >
                       <CheckCircle2 className="w-6 h-6" />
                     </button>
-                    <p className="flex-1 text-sm text-zinc-500 line-through">{req.text}</p>
+                    <div className="flex-1">
+                      <p className="text-sm text-theme-muted line-through">{req.text}</p>
+                      {req.dueDate && (
+                        <p className="text-xs text-theme-muted/60 mt-1 flex items-center gap-1 line-through">
+                          <Calendar className="w-3 h-3" /> Due: {new Date(req.dueDate).toLocaleDateString(undefined, { timeZone: 'UTC' })}
+                        </p>
+                      )}
+                    </div>
                     <button 
                       onClick={() => deleteRequest(req.id)}
-                      className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-500 transition-all"
+                      className="opacity-0 group-hover:opacity-100 text-theme-muted/60 hover:text-red-500 transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

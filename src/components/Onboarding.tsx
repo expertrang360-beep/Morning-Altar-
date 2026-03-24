@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, Clock, Timer, Mic, Bell, BookOpen } from 'lucide-react';
+import { ChevronRight, Clock, Timer, Mic, Bell, BookOpen, User, Mail } from 'lucide-react';
 import { StudyPlanType } from '../types';
 
 interface OnboardingProps {
-  onComplete: (time: string, length: number, studyPlan: StudyPlanType) => void;
+  onComplete: (time: string, length: number, studyPlan: StudyPlanType, username?: string, email?: string) => void;
 }
 
 export function Onboarding({ onComplete }: OnboardingProps) {
   const [step, setStep] = useState(0);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [time, setTime] = useState('06:00');
   const [length, setLength] = useState(10);
   const [studyPlan, setStudyPlan] = useState<StudyPlanType>('none');
@@ -64,23 +66,55 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     {
       title: "Meet God before the noise",
       description: "Morning Altar is your sacred space to start the day with intention, scripture, and reflection.",
-      icon: <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20">
-              <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center animate-pulse">
-                <div className="w-6 h-6 rounded-full bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)]" />
+      icon: <div className="w-20 h-20 rounded-full bg-theme-accent/10 flex items-center justify-center mb-8 border border-theme-accent/20">
+              <div className="w-12 h-12 rounded-full bg-theme-accent/20 flex items-center justify-center animate-pulse">
+                <div className="w-6 h-6 rounded-full bg-theme-accent shadow-[0_0_20px_rgba(var(--theme-accent-rgb),0.5)]" />
               </div>
             </div>
     },
     {
+      title: "What should we call you?",
+      description: "Enter a username to personalize your experience.",
+      icon: <User className="w-16 h-16 text-theme-accent mb-8" />,
+      content: (
+        <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+          <input 
+            type="text" 
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+            className="w-full bg-theme-card border border-theme-border rounded-2xl p-4 text-xl text-center text-theme-text focus:outline-none focus:border-theme-accent/50 transition-colors"
+          />
+        </div>
+      )
+    },
+    {
+      title: "Account Recovery",
+      description: "Add an email address so you can recover your account if you lose access. This is optional.",
+      icon: <Mail className="w-16 h-16 text-theme-accent mb-8" />,
+      content: (
+        <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+          <input 
+            type="email" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email (Optional)"
+            className="w-full bg-theme-card border border-theme-border rounded-2xl p-4 text-xl text-center text-theme-text focus:outline-none focus:border-theme-accent/50 transition-colors"
+          />
+        </div>
+      )
+    },
+    {
       title: "Set Your Altar Time",
       description: "Choose a time for your daily reminder. We'll help you stay consistent.",
-      icon: <Clock className="w-16 h-16 text-amber-500 mb-8" />,
+      icon: <Clock className="w-16 h-16 text-theme-accent mb-8" />,
       content: (
         <div className="flex flex-col items-center gap-4 w-full max-w-xs">
           <input 
             type="time" 
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-4xl text-center text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+            className="w-full bg-theme-card border border-theme-border rounded-2xl p-6 text-4xl text-center text-theme-text focus:outline-none focus:border-theme-accent/50 transition-colors"
           />
         </div>
       )
@@ -88,7 +122,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     {
       title: "Session Length",
       description: "How much time would you like to dedicate each morning?",
-      icon: <Timer className="w-16 h-16 text-amber-500 mb-8" />,
+      icon: <Timer className="w-16 h-16 text-theme-accent mb-8" />,
       content: (
         <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
           {[5, 10, 15].map((l) => (
@@ -97,8 +131,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               onClick={() => setLength(l)}
               className={`p-4 rounded-2xl border transition-all ${
                 length === l 
-                  ? 'bg-amber-500 border-amber-500 text-black font-bold' 
-                  : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                  ? 'bg-theme-accent border-theme-accent text-theme-bg font-bold' 
+                  : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
               }`}
             >
               {l}m
@@ -110,7 +144,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     {
       title: "Bible Study Plan",
       description: "Would you like to follow a plan to read through the entire Bible?",
-      icon: <BookOpen className="w-16 h-16 text-amber-500 mb-8" />,
+      icon: <BookOpen className="w-16 h-16 text-theme-accent mb-8" />,
       content: (
         <div className="flex flex-col gap-3 w-full max-w-sm">
           {[
@@ -124,8 +158,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               onClick={() => setStudyPlan(p.id as StudyPlanType)}
               className={`p-4 rounded-2xl border text-left transition-all ${
                 studyPlan === p.id 
-                  ? 'bg-amber-500 border-amber-500 text-black font-bold' 
-                  : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                  ? 'bg-theme-accent border-theme-accent text-theme-bg font-bold' 
+                  : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
               }`}
             >
               {p.label}
@@ -138,8 +172,8 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       title: "Ready to Begin",
       description: "To provide the best experience, we need access to notifications and your microphone for the read-aloud feature.",
       icon: <div className="flex gap-4 mb-8">
-              <Bell className={`w-12 h-12 ${notificationsGranted ? 'text-emerald-500' : 'text-amber-500'}`} />
-              <Mic className={`w-12 h-12 ${micGranted ? 'text-emerald-500' : 'text-amber-500'}`} />
+              <Bell className={`w-12 h-12 ${notificationsGranted ? 'text-emerald-500' : 'text-theme-accent'}`} />
+              <Mic className={`w-12 h-12 ${micGranted ? 'text-emerald-500' : 'text-theme-accent'}`} />
             </div>,
       content: (
         <div className="flex flex-col gap-4 w-full max-w-xs">
@@ -149,7 +183,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${
                 notificationsGranted 
                   ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500' 
-                  : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                  : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
               }`}
             >
               <Bell className="w-6 h-6" />
@@ -160,7 +194,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${
                 micGranted 
                   ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500' 
-                  : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                  : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
               }`}
             >
               <Mic className="w-6 h-6" />
@@ -169,12 +203,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </div>
           
           <button 
-            onClick={() => onComplete(time, length, studyPlan)}
+            onClick={() => onComplete(time, length, studyPlan, username, email)}
             disabled={!notificationsGranted && !micGranted}
             className={`w-full mt-4 font-bold py-4 rounded-2xl transition-all ${
               notificationsGranted || micGranted
-                ? 'bg-amber-500 text-black hover:bg-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.3)]'
-                : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                ? 'bg-theme-accent text-theme-bg hover:opacity-90 shadow-[0_0_30px_rgba(var(--theme-accent-rgb),0.3)]'
+                : 'bg-theme-card text-theme-muted cursor-not-allowed'
             }`}
           >
             Continue to my day
@@ -187,7 +221,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const currentStep = steps[step];
 
   return (
-    <div className="fixed inset-0 bg-black text-white flex flex-col items-center justify-center p-8 overflow-hidden">
+    <div className="fixed inset-0 bg-theme-bg text-theme-text flex flex-col items-center justify-center p-8 overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
@@ -198,14 +232,23 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         >
           {currentStep.icon}
           <h1 className="text-3xl font-bold mb-4 tracking-tight">{currentStep.title}</h1>
-          <p className="text-zinc-400 mb-12 leading-relaxed">{currentStep.description}</p>
+          <p className="text-theme-muted mb-12 leading-relaxed">{currentStep.description}</p>
           
           {currentStep.content}
 
           {step < steps.length - 1 && (
             <button
-              onClick={() => setStep(s => s + 1)}
-              className="mt-12 flex items-center gap-2 text-amber-500 font-medium hover:text-amber-400 transition-colors"
+              onClick={() => {
+                if (step === 1 && !username.trim()) {
+                  // Require username
+                  return;
+                }
+                setStep(s => s + 1)
+              }}
+              disabled={step === 1 && !username.trim()}
+              className={`mt-12 flex items-center gap-2 font-medium transition-colors ${
+                step === 1 && !username.trim() ? 'text-theme-muted/50 cursor-not-allowed' : 'text-theme-accent hover:opacity-80'
+              }`}
             >
               Continue <ChevronRight className="w-4 h-4" />
             </button>
@@ -218,7 +261,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <div 
             key={i} 
             className={`h-1 rounded-full transition-all duration-500 ${
-              i === step ? 'w-8 bg-amber-500' : 'w-2 bg-zinc-800'
+              i === step ? 'w-8 bg-theme-accent' : 'w-2 bg-theme-border'
             }`} 
           />
         ))}

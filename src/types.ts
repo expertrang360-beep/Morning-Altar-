@@ -12,21 +12,26 @@ export interface Devotion {
 }
 
 export type StudyPlanType = '6months' | '1year' | '2years' | 'none';
+export type ThemeId = 'classic' | 'dawn' | 'forest' | 'midnight' | 'sepia';
 
 export interface PrayerRequest {
   id: string;
   text: string;
   createdAt: string;
   isAnswered: boolean;
+  dueDate?: string;
 }
 
 export interface UserData {
   onboarded: boolean;
+  username?: string;
+  email?: string;
   devotionTime: string;
   sessionLength: number;
   streak: number;
   points: number;
   lastCompletedDate: string | null;
+  lastQuizDate: string | null;
   reflections: ReflectionEntry[];
   currentDevotionId: string | null;
   recentDevotionIds: string[];
@@ -34,6 +39,7 @@ export interface UserData {
   studyPlan: StudyPlanType;
   studyPlanStartDate: string | null;
   prayerRequests: PrayerRequest[];
+  themeId?: ThemeId;
 }
 
 export interface ReflectionEntry {

@@ -6,7 +6,7 @@ export function SplashScreen() {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
-      className="fixed inset-0 bg-black flex flex-col items-center justify-center z-[9999] overflow-hidden"
+      className="fixed inset-0 bg-theme-bg flex flex-col items-center justify-center z-[9999] overflow-hidden"
     >
       <div className="relative flex flex-col items-center">
         {/* Glowing background behind the book */}
@@ -14,11 +14,11 @@ export function SplashScreen() {
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1.5 }}
           transition={{ delay: 0.3, duration: 1.5, ease: "easeOut" }}
-          className="absolute inset-0 bg-amber-500/10 blur-[60px] rounded-full"
+          className="absolute inset-0 bg-theme-accent/10 blur-[60px] rounded-full"
         />
         
         {/* The Bible Icon Animation */}
-        <div className="relative z-10 text-amber-500 mb-8 flex items-center justify-center" style={{ perspective: "1000px" }}>
+        <div className="relative z-10 text-theme-accent mb-8 flex items-center justify-center" style={{ perspective: "1000px" }}>
           <svg 
             width="120" 
             height="120" 
@@ -28,7 +28,7 @@ export function SplashScreen() {
             strokeWidth="1.5" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
-            className="drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] overflow-visible"
+            className="drop-shadow-[0_0_15px_rgba(var(--theme-accent-rgb),0.5)] overflow-visible"
           >
             {/* Left Page */}
             <motion.path 
@@ -60,7 +60,7 @@ export function SplashScreen() {
             initial={{ opacity: 0, height: 0, y: 0 }}
             animate={{ opacity: [0, 0.8, 0], height: 160, y: -80 }}
             transition={{ delay: 0.8, duration: 2, ease: "easeOut" }}
-            className="absolute top-[40%] left-1/2 -translate-x-1/2 w-20 bg-gradient-to-t from-amber-500/40 to-transparent blur-xl pointer-events-none"
+            className="absolute top-[40%] left-1/2 -translate-x-1/2 w-20 bg-gradient-to-t from-theme-accent/40 to-transparent blur-xl pointer-events-none"
             style={{ transformOrigin: "bottom center" }}
           />
         </div>
@@ -72,18 +72,18 @@ export function SplashScreen() {
           transition={{ delay: 1, duration: 0.8 }}
           className="text-center relative z-10"
         >
-          <h1 className="text-4xl font-bold tracking-tight text-white mb-3">Morning Altar</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-theme-text mb-3">Morning Altar</h1>
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: "100%" }}
             transition={{ delay: 1.5, duration: 0.8, ease: "easeInOut" }}
-            className="h-[1px] bg-amber-500/50 mx-auto mb-3"
+            className="h-[1px] bg-theme-accent/50 mx-auto mb-3"
           />
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.8, duration: 0.8 }}
-            className="text-amber-500/80 tracking-[0.3em] uppercase text-[10px] font-bold"
+            className="text-theme-accent/80 tracking-[0.3em] uppercase text-[10px] font-bold"
           >
             Prepare Your Heart
           </motion.p>

@@ -1,16 +1,82 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", serif;
+  --font-sans: var(--font-main), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-display), serif;
+  --font-mono: var(--font-mono-var), ui-monospace, SFMono-Regular, monospace;
+  
+  --color-theme-bg: var(--bg);
+  --color-theme-text: var(--text);
+  --color-theme-accent: var(--accent);
+  --color-theme-card: var(--card);
+  --color-theme-border: var(--border);
+  --color-theme-muted: var(--muted);
+}
+
+:root {
+  --bg: #000;
+  --text: #fff;
+  --accent: #f59e0b;
+  --card: #18181b;
+  --border: #27272a;
+  --muted: #71717a;
+  --font-main: "Inter";
+  --font-display: "Playfair Display";
+  --font-mono-var: "JetBrains Mono";
+}
+
+.theme-dawn {
+  --bg: #fdfcfb;
+  --text: #1a1a1a;
+  --accent: #e67e22;
+  --card: #ffffff;
+  --border: #e5e5e5;
+  --muted: #666666;
+  --font-main: "Inter";
+  --font-display: "Playfair Display";
+}
+
+.theme-forest {
+  --bg: #0b1a10;
+  --text: #e8f5e9;
+  --accent: #4caf50;
+  --card: #142a1c;
+  --border: #1e3d29;
+  --muted: #81c784;
+  --font-main: "Inter";
+  --font-display: "Merriweather";
+}
+
+.theme-midnight {
+  --bg: #020617;
+  --text: #f8fafc;
+  --accent: #38bdf8;
+  --card: #0f172a;
+  --border: #1e293b;
+  --muted: #94a3b8;
+  --font-main: "Space Grotesk";
+  --font-display: "Space Grotesk";
+}
+
+.theme-sepia {
+  --bg: #f4ecd8;
+  --text: #433422;
+  --accent: #8b4513;
+  --card: #efe3c2;
+  --border: #d7c9a3;
+  --muted: #705c44;
+  --font-main: "Merriweather";
+  --font-display: "Merriweather";
 }
 
 body {
-  background-color: #000;
-  color: #fff;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-main), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 /* Custom scrollbar for a cleaner look */

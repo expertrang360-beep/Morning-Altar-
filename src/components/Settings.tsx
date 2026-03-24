@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Clock, Bell, BookOpen, HelpCircle, Mail, Globe, ExternalLink, ChevronRight } from 'lucide-react';
-import { UserData, StudyPlanType } from '../types';
+import { X, Clock, Bell, BookOpen, HelpCircle, Mail, Globe, ExternalLink, ChevronRight, User, Palette } from 'lucide-react';
+import { UserData, StudyPlanType, ThemeId } from '../types';
 
 interface SettingsProps {
   userData: UserData;
@@ -12,6 +12,9 @@ interface SettingsProps {
 export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
   const [time, setTime] = useState(userData.devotionTime);
   const [studyPlan, setStudyPlan] = useState<StudyPlanType>(userData.studyPlan);
+  const [username, setUsername] = useState(userData.username || '');
+  const [email, setEmail] = useState(userData.email || '');
+  const [themeId, setThemeId] = useState<ThemeId>(userData.themeId || 'classic');
   const [notificationsGranted, setNotificationsGranted] = useState(false);
 
   useEffect(() => {
@@ -31,6 +34,9 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
     const updates: Partial<UserData> = {
       devotionTime: time,
       studyPlan: studyPlan,
+      username: username,
+      email: email,
+      themeId: themeId,
     };
 
     if (studyPlan !== userData.studyPlan) {
@@ -42,48 +48,71 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[150] flex items-center justify-center p-6">
+    <div className="fixed inset-0 bg-theme-bg/80 backdrop-blur-sm z-[150] flex items-center justify-center p-6">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-zinc-900 border border-zinc-800 p-8 rounded-[2rem] w-full max-w-sm flex flex-col max-h-[90vh]"
+        className="bg-theme-bg border border-theme-border p-8 rounded-[2rem] w-full max-w-sm flex flex-col max-h-[90vh]"
       >
         <div className="flex justify-between items-center mb-8 flex-shrink-0">
-          <h2 className="text-2xl font-bold text-white">Settings</h2>
+          <h2 className="text-2xl font-bold text-theme-text">Settings</h2>
           <button 
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
+            className="w-10 h-10 rounded-full bg-theme-card flex items-center justify-center hover:opacity-80 transition-colors"
           >
-            <X className="w-5 h-5 text-zinc-400" />
+            <X className="w-5 h-5 text-theme-muted" />
           </button>
         </div>
 
         <div className="space-y-6 overflow-y-auto pr-2 pb-4 flex-1 custom-scrollbar">
+          {/* Profile */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-bold text-theme-muted uppercase tracking-widest mb-3">
+              <User className="w-4 h-4" /> Profile
+            </label>
+            <div className="space-y-3">
+              <input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+                className="w-full bg-theme-card border border-theme-border rounded-2xl p-4 text-theme-text focus:outline-none focus:border-theme-accent/50 transition-colors"
+              />
+              <input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Recovery Email (Optional)"
+                className="w-full bg-theme-card border border-theme-border rounded-2xl p-4 text-theme-text focus:outline-none focus:border-theme-accent/50 transition-colors"
+              />
+            </div>
+          </div>
+
           {/* Devotion Time */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-bold text-zinc-400 uppercase tracking-widest mb-3">
+            <label className="flex items-center gap-2 text-sm font-bold text-theme-muted uppercase tracking-widest mb-3">
               <Clock className="w-4 h-4" /> Daily Reminder Time
             </label>
             <input 
               type="time" 
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl p-4 text-2xl text-center text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+              className="w-full bg-theme-card border border-theme-border rounded-2xl p-4 text-2xl text-center text-theme-text focus:outline-none focus:border-theme-accent/50 transition-colors"
             />
           </div>
 
           {/* Notifications */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-bold text-zinc-400 uppercase tracking-widest mb-3">
+            <label className="flex items-center gap-2 text-sm font-bold text-theme-muted uppercase tracking-widest mb-3">
               <Bell className="w-4 h-4" /> Notifications
             </label>
             <button 
               onClick={requestNotifications}
               className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between ${
                 notificationsGranted 
-                  ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500' 
-                  : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                  ? 'bg-theme-accent/10 border-theme-accent/20 text-theme-accent' 
+                  : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
               }`}
             >
               <span className="font-medium">
@@ -92,7 +121,7 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
               <Bell className="w-5 h-5" />
             </button>
             {!notificationsGranted && (
-              <p className="text-xs text-zinc-500 mt-2">
+              <p className="text-xs text-theme-muted mt-2">
                 Enable notifications to receive your daily reminder.
               </p>
             )}
@@ -100,7 +129,7 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
 
           {/* Study Plan */}
           <div>
-            <label className="flex items-center gap-2 text-sm font-bold text-zinc-400 uppercase tracking-widest mb-3">
+            <label className="flex items-center gap-2 text-sm font-bold text-theme-muted uppercase tracking-widest mb-3">
               <BookOpen className="w-4 h-4" /> Bible Study Plan
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -115,8 +144,8 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
                   onClick={() => setStudyPlan(p.id as StudyPlanType)}
                   className={`p-3 rounded-xl border text-sm transition-all ${
                     studyPlan === p.id 
-                      ? 'bg-amber-500 border-amber-500 text-black font-bold' 
-                      : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                      ? 'bg-theme-accent border-theme-accent text-theme-bg font-bold' 
+                      : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
                   }`}
                 >
                   {p.label}
@@ -125,38 +154,70 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
             </div>
           </div>
 
+          {/* Theme Selection */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-bold text-theme-muted uppercase tracking-widest mb-3">
+              <Palette className="w-4 h-4" /> App Theme
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'classic', label: 'Classic Dark', preview: '#000' },
+                { id: 'dawn', label: 'Morning Dawn', preview: '#fdfcfb' },
+                { id: 'forest', label: 'Quiet Forest', preview: '#0b1a10' },
+                { id: 'midnight', label: 'Midnight', preview: '#020617' },
+                { id: 'sepia', label: 'Ancient Scroll', preview: '#f4ecd8' }
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setThemeId(t.id as ThemeId)}
+                  className={`p-3 rounded-xl border text-sm transition-all flex items-center gap-2 ${
+                    themeId === t.id 
+                      ? 'bg-theme-accent border-theme-accent text-theme-bg font-bold' 
+                      : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
+                  }`}
+                >
+                  <div 
+                    className="w-4 h-4 rounded-full border border-theme-text/20" 
+                    style={{ backgroundColor: t.preview }}
+                  />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Support & Contact */}
-          <div className="pt-4 border-t border-zinc-800">
-            <label className="flex items-center gap-2 text-sm font-bold text-zinc-400 uppercase tracking-widest mb-3">
+          <div className="pt-4 border-t border-theme-border">
+            <label className="flex items-center gap-2 text-sm font-bold text-theme-muted uppercase tracking-widest mb-3">
               <HelpCircle className="w-4 h-4" /> Support & Contact
             </label>
             <div className="space-y-3">
               <a 
                 href="mailto:smarttechpro2021@gmail.com"
-                className="w-full p-4 rounded-2xl bg-zinc-800 border border-zinc-700 text-zinc-300 hover:border-zinc-600 transition-all flex items-center justify-between"
+                className="w-full p-4 rounded-2xl bg-theme-card border border-theme-border text-theme-text/80 hover:opacity-80 transition-all flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-amber-500" />
+                  <Mail className="w-5 h-5 text-theme-accent" />
                   <span className="font-medium text-sm">Email Support</span>
                 </div>
-                <ChevronRight className="w-4 h-4 text-zinc-500" />
+                <ChevronRight className="w-4 h-4 text-theme-muted" />
               </a>
               
               <a 
                 href="https://smarttechprotech.netlify.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full p-4 rounded-2xl bg-zinc-800 border border-zinc-700 text-zinc-300 hover:border-zinc-600 transition-all flex items-center justify-between"
+                className="w-full p-4 rounded-2xl bg-theme-card border border-theme-border text-theme-text/80 hover:opacity-80 transition-all flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <Globe className="w-5 h-5 text-amber-500" />
+                  <Globe className="w-5 h-5 text-theme-accent" />
                   <span className="font-medium text-sm">Visit Our Website</span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-zinc-500" />
+                <ExternalLink className="w-4 h-4 text-theme-muted" />
               </a>
 
-              <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl mt-4">
-                <p className="text-xs text-amber-500/90 leading-relaxed">
+              <div className="bg-theme-accent/10 border border-theme-accent/20 p-4 rounded-2xl mt-4">
+                <p className="text-xs text-theme-accent/90 leading-relaxed">
                   <strong className="font-bold">Claiming Gifts:</strong> To claim your rewards, please take a screenshot of your dashboard showing your points and email it to us!
                 </p>
               </div>
@@ -166,7 +227,7 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
 
         <button 
           onClick={handleSave}
-          className="w-full mt-6 flex-shrink-0 bg-amber-500 text-black font-bold py-4 rounded-2xl hover:bg-amber-400 transition-colors"
+          className="w-full mt-6 flex-shrink-0 bg-theme-accent text-theme-bg font-bold py-4 rounded-2xl hover:opacity-90 transition-colors"
         >
           Save Changes
         </button>

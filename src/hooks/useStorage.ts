@@ -6,18 +6,22 @@ const STORAGE_KEY = 'morning_altar_user_data';
 
 const DEFAULT_USER_DATA: UserData = {
   onboarded: false,
+  username: '',
+  email: '',
   devotionTime: '06:00',
   sessionLength: 10,
   streak: 0,
   points: 0,
   lastCompletedDate: null,
+  lastQuizDate: null,
   reflections: [],
   currentDevotionId: null,
   recentDevotionIds: [],
   lastDevotionDate: null,
   studyPlan: 'none',
   studyPlanStartDate: null,
-  prayerRequests: []
+  prayerRequests: [],
+  themeId: 'classic'
 };
 
 export function useStorage() {
@@ -43,10 +47,12 @@ export function useStorage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
   }, [userData]);
 
-  const updateOnboarding = (devotionTime: string, sessionLength: number, studyPlan: StudyPlanType = 'none') => {
+  const updateOnboarding = (devotionTime: string, sessionLength: number, studyPlan: StudyPlanType = 'none', username?: string, email?: string) => {
     setUserData(prev => ({
       ...prev,
       onboarded: true,
+      username: username || prev.username,
+      email: email || prev.email,
       devotionTime,
       sessionLength,
       studyPlan,
@@ -148,5 +154,13 @@ export function useStorage() {
     }));
   };
 
-  return { userData, updateOnboarding, completeDevotion, selectDailyDevotion, updateStudyPlan, updateUserData };
+  const completeQuiz = (score: number) => {
+    setUserData(prev => ({
+      ...prev,
+      points: (prev.points || 0) + (score === 5 ? 2 : 0),
+      lastQuizDate: new Date().toISOString()
+    }));
+  };
+
+  return { userData, updateOnboarding, completeDevotion, selectDailyDevotion, updateStudyPlan, updateUserData, completeQuiz };
 }

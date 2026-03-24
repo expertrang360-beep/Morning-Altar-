@@ -50,7 +50,7 @@ export function VerseOfTheDay() {
   return (
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4 px-1">
-        <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+        <h3 className="text-sm font-bold text-theme-muted uppercase tracking-widest flex items-center gap-2">
           <BookOpen className="w-4 h-4" /> Verse of the Day
         </h3>
       </div>
@@ -58,27 +58,27 @@ export function VerseOfTheDay() {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-zinc-900/80 border border-zinc-800 p-6 rounded-3xl relative overflow-hidden"
+        className="bg-theme-card/80 border border-theme-border p-6 rounded-3xl relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
+        <div className="absolute top-0 left-0 w-1 h-full bg-theme-accent" />
         
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-6 gap-3">
-            <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
-            <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">Loading Verse...</p>
+            <Loader2 className="w-6 h-6 animate-spin text-theme-accent" />
+            <p className="text-xs text-theme-muted font-medium uppercase tracking-widest">Loading Verse...</p>
           </div>
         ) : error ? (
           <div className="text-center py-4">
-            <p className="text-zinc-500 text-sm">{error}</p>
+            <p className="text-theme-muted text-sm">{error}</p>
           </div>
         ) : verse ? (
           <div>
-            <p className="text-lg font-serif italic text-zinc-200 mb-4 leading-relaxed">
+            <p className="text-lg font-serif italic text-theme-text/90 mb-4 leading-relaxed">
               "{verse.text}"
             </p>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-[1px] bg-amber-500/50" />
-              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest">{verse.reference}</p>
+              <div className="w-6 h-[1px] bg-theme-accent/50" />
+              <p className="text-xs font-bold text-theme-accent uppercase tracking-widest">{verse.reference}</p>
             </div>
           </div>
         ) : null}

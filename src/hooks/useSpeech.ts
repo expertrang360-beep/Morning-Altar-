@@ -39,5 +39,9 @@ export function useSpeech() {
     recognition.start();
   }, []);
 
-  return { isListening, transcript, error, startListening };
+  const resetTranscript = useCallback(() => {
+    setTranscript('');
+  }, []);
+
+  return { isListening, transcript, error, startListening, resetTranscript };
 }

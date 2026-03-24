@@ -1,7 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Volume2, Loader2, ChevronRight, Play, Pause } from 'lucide-react';
+import { Volume2, VolumeX, Loader2, ChevronRight, Play, Pause, Music } from 'lucide-react';
 import { generateSpeech } from '../services/ttsService';
+
+const AMBIENT_SOUNDS: Record<string, string> = {
+  'Gratitude & Joy': 'https://cdn.pixabay.com/audio/2022/05/27/audio_180873747b.mp3',
+  'Inner Peace': 'https://cdn.pixabay.com/audio/2022/03/24/audio_78390a246c.mp3',
+  'Clarity of Mind': 'https://cdn.pixabay.com/audio/2022/01/21/audio_31743c589f.mp3',
+  'default': 'https://cdn.pixabay.com/audio/2022/03/24/audio_78390a246c.mp3'
+};
 
 interface MeditationStepProps {
   script: string[];
@@ -15,16 +22,45 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
   const [isPaused, setIsPaused] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isAmbientMuted, setIsAmbientMuted] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ambientRef = useRef<HTMLAudioElement | null>(null);
   const loadedIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Initialize ambient audio
+    const soundUrl = AMBIENT_SOUNDS[theme] || AMBIENT_SOUNDS['default'];
+    ambientRef.current = new Audio(soundUrl);
+    ambientRef.current.loop = true;
+    ambientRef.current.volume = 0.3; // Low background volume
+
+    return () => {
+      if (ambientRef.current) {
+        ambientRef.current.pause();
+        ambientRef.current = null;
+      }
+    };
+  }, [theme]);
+
+  useEffect(() => {
+    if (ambientRef.current) {
+      ambientRef.current.muted = isAmbientMuted;
+    }
+  }, [isAmbientMuted]);
 
   const playLine = async (index: number) => {
     if (index >= script.length) {
       setIsPlaying(false);
       setIsPaused(false);
       setHasStarted(false);
+      if (ambientRef.current) ambientRef.current.pause();
       return;
+    }
+
+    // Start ambient if not playing
+    if (ambientRef.current && ambientRef.current.paused && !isPaused) {
+      ambientRef.current.play().catch(e => console.error("Ambient play error:", e));
     }
 
     // If we already have this line loaded and we are just resuming
@@ -57,6 +93,7 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
             setIsPlaying(false);
             setIsPaused(false);
             setHasStarted(false);
+            if (ambientRef.current) ambientRef.current.pause();
           }
         };
 
@@ -99,11 +136,17 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
     if (audioRef.current) {
       audioRef.current.pause();
     }
+    if (ambientRef.current) {
+      ambientRef.current.pause();
+    }
     setIsPlaying(false);
     setIsPaused(true);
   };
 
   const handleResume = () => {
+    if (ambientRef.current) {
+      ambientRef.current.play().catch(e => console.error("Ambient resume error:", e));
+    }
     if (audioRef.current && loadedIndexRef.current === currentIndex) {
       audioRef.current.play();
       setIsPlaying(true);
@@ -115,7 +158,17 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
 
   return (
     <div className="flex flex-col items-center text-center w-full max-w-md">
-      <p className="text-amber-500 text-xs font-bold uppercase tracking-widest mb-4">Guided Meditation</p>
+      <div className="flex items-center justify-between w-full mb-4 px-4">
+        <div className="w-10" /> {/* Spacer */}
+        <p className="text-theme-accent text-xs font-bold uppercase tracking-widest">Guided Meditation</p>
+        <button 
+          onClick={() => setIsAmbientMuted(!isAmbientMuted)}
+          className="w-10 h-10 rounded-full bg-theme-card border border-theme-border flex items-center justify-center text-theme-muted hover:text-theme-accent transition-colors"
+          title={isAmbientMuted ? "Unmute Background" : "Mute Background"}
+        >
+          {isAmbientMuted ? <VolumeX className="w-4 h-4" /> : <Music className="w-4 h-4" />}
+        </button>
+      </div>
       <h2 className="text-2xl font-bold mb-12 leading-tight">
         {theme}
       </h2>
@@ -132,16 +185,16 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
             repeat: Infinity,
             ease: "easeInOut" 
           }}
-          className="absolute inset-0 bg-amber-500 rounded-full"
+          className="absolute inset-0 bg-theme-accent rounded-full"
         />
-        <div className="relative z-10 bg-zinc-900 w-48 h-48 rounded-full border border-zinc-800 flex flex-col items-center justify-center p-8">
+        <div className="relative z-10 bg-theme-card w-48 h-48 rounded-full border border-theme-border flex flex-col items-center justify-center p-8">
           <AnimatePresence mode="wait">
             <motion.p 
               key={currentIndex}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-sm text-zinc-300 italic leading-relaxed"
+              className="text-sm text-theme-text/80 italic leading-relaxed"
             >
               {script[currentIndex]}
             </motion.p>
@@ -154,7 +207,7 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
           <button 
             onClick={handleStart}
             disabled={isGenerating}
-            className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-center gap-2 text-white hover:bg-zinc-800 transition-all disabled:opacity-50"
+            className="w-full bg-theme-card border border-theme-border p-4 rounded-2xl flex items-center justify-center gap-2 text-theme-text hover:opacity-80 transition-all disabled:opacity-50"
           >
             {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5" />}
             {isGenerating ? 'Loading...' : 'Start Guidance'}
@@ -165,7 +218,7 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
               <button 
                 onClick={handlePause}
                 disabled={isGenerating}
-                className="flex-1 bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-center gap-2 text-white hover:bg-zinc-800 transition-all disabled:opacity-50"
+                className="flex-1 bg-theme-card border border-theme-border p-4 rounded-2xl flex items-center justify-center gap-2 text-theme-text hover:opacity-80 transition-all disabled:opacity-50"
               >
                 {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Pause className="w-5 h-5" />}
                 {isGenerating ? 'Loading...' : 'Pause'}
@@ -173,7 +226,7 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
             ) : (
               <button 
                 onClick={handleResume}
-                className="flex-1 bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-center gap-2 text-white hover:bg-zinc-800 transition-all"
+                className="flex-1 bg-theme-card border border-theme-border p-4 rounded-2xl flex items-center justify-center gap-2 text-theme-text hover:opacity-80 transition-all"
               >
                 <Play className="w-5 h-5" /> Resume
               </button>
@@ -183,7 +236,7 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
 
         <button 
           onClick={onComplete}
-          className="w-full bg-amber-500 text-black font-bold py-5 rounded-2xl hover:bg-amber-400 transition-all"
+          className="w-full bg-theme-accent text-theme-bg font-bold py-5 rounded-2xl hover:opacity-90 transition-all"
         >
           I'm Centered
         </button>
@@ -194,7 +247,7 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
           <div 
             key={i} 
             className={`h-1 rounded-full transition-all duration-300 ${
-              i === currentIndex ? 'w-4 bg-amber-500' : 'w-1 bg-zinc-800'
+              i === currentIndex ? 'w-4 bg-theme-accent' : 'w-1 bg-theme-border'
             }`} 
           />
         ))}

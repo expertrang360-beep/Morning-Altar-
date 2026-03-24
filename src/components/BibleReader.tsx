@@ -213,7 +213,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-black text-zinc-100 font-sans relative overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-theme-bg text-theme-text font-sans relative overflow-hidden">
       {/* Focus Mode Background */}
       <AnimatePresence>
         {isFocusMode && (
@@ -223,48 +223,48 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-0 pointer-events-none"
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(245,158,11,0.03),transparent_70%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(var(--accent),0.03),transparent_70%)]" />
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Header */}
-      <header className={`flex items-center justify-between p-4 border-bottom border-zinc-800 bg-black/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-500 ${isFocusMode ? 'opacity-0 -translate-y-4 pointer-events-none' : 'opacity-100'}`}>
+      <header className={`flex items-center justify-between p-4 border-b border-theme-border bg-theme-bg/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-500 ${isFocusMode ? 'opacity-0 -translate-y-4 pointer-events-none' : 'opacity-100'}`}>
         <button 
           onClick={onBack}
-          className="p-2 -ml-2 text-zinc-400 hover:text-white transition-colors"
+          className="p-2 -ml-2 text-theme-muted hover:text-theme-text transition-colors"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
         
         <button 
           onClick={() => setIsPickerOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-theme-card border border-theme-border hover:opacity-80 transition-colors"
         >
           <span className="font-bold text-sm tracking-tight">
             {selectedBook.name} {selectedChapter}
           </span>
-          <ChevronRight className="w-4 h-4 rotate-90 text-amber-500" />
+          <ChevronRight className="w-4 h-4 rotate-90 text-theme-accent" />
         </button>
 
         <div className="relative">
           <select
             value={selectedVersion}
             onChange={(e) => setSelectedVersion(e.target.value)}
-            className="bg-zinc-900 border border-zinc-800 rounded-full pl-4 pr-8 py-2 text-xs font-bold text-zinc-300 outline-none appearance-none cursor-pointer hover:bg-zinc-800 transition-colors"
+            className="bg-theme-card border border-theme-border rounded-full pl-4 pr-8 py-2 text-xs font-bold text-theme-text/80 outline-none appearance-none cursor-pointer hover:opacity-80 transition-colors"
           >
             <option value="kjv">KJV</option>
             <option value="web">WEB</option>
             <option value="bbe">BBE</option>
           </select>
-          <ChevronRight className="w-3 h-3 rotate-90 text-zinc-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronRight className="w-3 h-3 rotate-90 text-theme-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
       </header>
 
       {/* Focus Mode Toggle */}
       <button 
         onClick={() => setIsFocusMode(!isFocusMode)}
-        className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-zinc-900/50 backdrop-blur-md border border-zinc-800 flex items-center justify-center z-[60] transition-all hover:bg-zinc-800 ${isFocusMode ? 'text-amber-500 border-amber-500/30' : 'text-zinc-500'}`}
+        className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-theme-card/50 backdrop-blur-md border border-theme-border flex items-center justify-center z-[60] transition-all hover:opacity-80 ${isFocusMode ? 'text-theme-accent border-theme-accent/30' : 'text-theme-muted'}`}
       >
         {isFocusMode ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
       </button>
@@ -272,19 +272,19 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
       {/* Content */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 pb-32 z-10">
         {isLoading ? (
-          <div className="h-full flex flex-col items-center justify-center text-zinc-500 gap-4">
-            <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+          <div className="h-full flex flex-col items-center justify-center text-theme-muted gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-theme-accent" />
             <p className="text-sm font-medium animate-pulse">Opening the Word...</p>
           </div>
         ) : error ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-8">
-            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-              <X className="w-8 h-8 text-red-500" />
+            <div className="w-16 h-16 rounded-full bg-theme-accent/10 flex items-center justify-center mb-4">
+              <X className="w-8 h-8 text-theme-accent" />
             </div>
-            <p className="text-zinc-400 mb-6">{error}</p>
+            <p className="text-theme-muted mb-6">{error}</p>
             <button 
               onClick={() => fetchChapter(selectedBook.name, selectedChapter, selectedVersion)}
-              className="px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-2xl text-sm font-bold hover:bg-zinc-800 transition-colors"
+              className="px-6 py-3 bg-theme-card border border-theme-border rounded-2xl text-sm font-bold hover:opacity-80 transition-colors"
             >
               Try Again
             </button>
@@ -296,11 +296,11 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
             className={`max-w-2xl mx-auto transition-all duration-700 ${isFocusMode ? 'mt-12' : ''}`}
           >
             <div className="mb-12 text-center">
-              <p className="text-amber-500 text-xs font-bold uppercase tracking-[0.2em] mb-2">
+              <p className="text-theme-accent text-xs font-bold uppercase tracking-[0.2em] mb-2">
                 {selectedBook.name}
               </p>
               <h2 className={`font-bold tracking-tighter mb-4 transition-all duration-500 ${isFocusMode ? 'text-6xl' : 'text-5xl'}`}>Chapter {selectedChapter}</h2>
-              <div className="h-1 w-12 bg-amber-500/20 mx-auto rounded-full mb-6" />
+              <div className="h-1 w-12 bg-theme-accent/20 mx-auto rounded-full mb-6" />
               
               {/* Audio Controls */}
               <div className={`flex flex-col items-center justify-center gap-4 transition-opacity duration-500 ${isFocusMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
@@ -308,16 +308,16 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                   <button
                     onClick={handlePlayAudio}
                     disabled={isAudioLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-full hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-theme-card border border-theme-border rounded-full hover:opacity-80 transition-colors disabled:opacity-50"
                   >
                     {isAudioLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                      <Loader2 className="w-4 h-4 animate-spin text-theme-accent" />
                     ) : isPlaying ? (
-                      <Pause className="w-4 h-4 text-amber-500" />
+                      <Pause className="w-4 h-4 text-theme-accent" />
                     ) : (
-                      <Play className="w-4 h-4 text-amber-500" />
+                      <Play className="w-4 h-4 text-theme-accent" />
                     )}
-                    <span className="text-xs font-bold text-zinc-300">
+                    <span className="text-xs font-bold text-theme-text/80">
                       {isAudioLoading ? 'Loading Audio...' : isPlaying ? 'Pause' : 'Listen'}
                     </span>
                   </button>
@@ -325,24 +325,24 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                   {audioRef.current?.src && (
                     <button
                       onClick={handleStopAudio}
-                      className="p-2 bg-zinc-900 border border-zinc-800 rounded-full hover:bg-zinc-800 transition-colors"
+                      className="p-2 bg-theme-card border border-theme-border rounded-full hover:opacity-80 transition-colors"
                       title="Stop"
                     >
-                      <Square className="w-4 h-4 text-zinc-400" />
+                      <Square className="w-4 h-4 text-theme-muted" />
                     </button>
                   )}
                 </div>
 
                 <div className="flex items-center justify-center gap-2">
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Speed:</span>
+                  <span className="text-[10px] text-theme-muted font-bold uppercase tracking-widest">Speed:</span>
                   {[0.75, 1, 1.25].map(speed => (
                     <button
                       key={speed}
                       onClick={() => setPlaybackSpeed(speed)}
                       className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors ${
                         playbackSpeed === speed 
-                          ? 'bg-amber-500 text-black' 
-                          : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800'
+                          ? 'bg-theme-accent text-theme-bg' 
+                          : 'bg-theme-card border border-theme-border text-theme-muted hover:opacity-80'
                       }`}
                     >
                       {speed}x
@@ -359,10 +359,10 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                   id={`verse-${v.verse}`}
                   className="group relative pl-8 md:pl-0"
                 >
-                  <span className={`absolute left-0 md:-left-8 top-1.5 md:top-1 text-[10px] font-bold transition-all duration-500 ${isFocusMode ? 'opacity-20' : 'text-zinc-600 group-hover:text-amber-500'} ${targetVerse === v.verse ? '!text-amber-500 scale-125' : ''}`}>
+                  <span className={`absolute left-0 md:-left-8 top-1.5 md:top-1 text-[10px] font-bold transition-all duration-500 ${isFocusMode ? 'opacity-20' : 'text-theme-muted/60 group-hover:text-theme-accent'} ${targetVerse === v.verse ? '!text-theme-accent scale-125' : ''}`}>
                     {v.verse}
                   </span>
-                  <p className={`leading-relaxed font-light transition-all duration-500 ${isFocusMode ? 'text-2xl leading-[1.8] text-zinc-100' : 'text-xl'} ${targetVerse === v.verse ? 'text-amber-400 font-normal drop-shadow-md' : 'text-zinc-300'}`}>
+                  <p className={`leading-relaxed font-light transition-all duration-500 ${isFocusMode ? 'text-2xl leading-[1.8] text-theme-text' : 'text-xl'} ${targetVerse === v.verse ? 'text-theme-accent font-normal drop-shadow-md' : 'text-theme-text/90'}`}>
                     {v.text}
                   </p>
                 </div>
@@ -373,17 +373,17 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
             <div className={`mt-20 flex justify-between items-center gap-4 transition-all duration-500 ${isFocusMode ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-100'}`}>
               <button 
                 onClick={handlePrevChapter}
-                className="flex-1 flex items-center justify-center gap-2 p-6 bg-zinc-900/50 border border-zinc-800 rounded-[2rem] hover:bg-zinc-800 transition-all group"
+                className="flex-1 flex items-center justify-center gap-2 p-6 bg-theme-card/50 border border-theme-border rounded-[2rem] hover:opacity-80 transition-all group"
               >
-                <ChevronLeft className="w-5 h-5 text-zinc-500 group-hover:text-amber-500 transition-colors" />
-                <span className="text-sm font-bold text-zinc-400 group-hover:text-white">Previous</span>
+                <ChevronLeft className="w-5 h-5 text-theme-muted group-hover:text-theme-accent transition-colors" />
+                <span className="text-sm font-bold text-theme-muted group-hover:text-theme-text">Previous</span>
               </button>
               <button 
                 onClick={handleNextChapter}
-                className="flex-1 flex items-center justify-center gap-2 p-6 bg-zinc-900/50 border border-zinc-800 rounded-[2rem] hover:bg-zinc-800 transition-all group"
+                className="flex-1 flex items-center justify-center gap-2 p-6 bg-theme-card/50 border border-theme-border rounded-[2rem] hover:opacity-80 transition-all group"
               >
-                <span className="text-sm font-bold text-zinc-400 group-hover:text-white">Next</span>
-                <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+                <span className="text-sm font-bold text-theme-muted group-hover:text-theme-text">Next</span>
+                <ChevronRight className="w-5 h-5 text-theme-muted group-hover:text-theme-accent transition-colors" />
               </button>
             </div>
           </motion.div>
@@ -397,26 +397,26 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black z-[100] flex flex-col"
+            className="fixed inset-0 bg-theme-bg z-[100] flex flex-col"
           >
-            <header className="p-4 flex items-center justify-between border-bottom border-zinc-800">
+            <header className="p-4 flex items-center justify-between border-b border-theme-border">
               <div className="flex gap-4">
                 <button 
                   onClick={() => setPickerTab('browse')}
-                  className={`text-lg font-bold transition-colors ${pickerTab === 'browse' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`text-lg font-bold transition-colors ${pickerTab === 'browse' ? 'text-theme-text' : 'text-theme-muted hover:text-theme-text/80'}`}
                 >
                   Browse
                 </button>
                 <button 
                   onClick={() => setPickerTab('search')}
-                  className={`text-lg font-bold transition-colors ${pickerTab === 'search' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`text-lg font-bold transition-colors ${pickerTab === 'search' ? 'text-theme-text' : 'text-theme-muted hover:text-theme-text/80'}`}
                 >
                   Search
                 </button>
               </div>
               <button 
                 onClick={() => setIsPickerOpen(false)}
-                className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-theme-card flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -426,20 +426,20 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
               <>
                 <div className="p-4">
                   <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
                     <input 
                       type="text"
                       placeholder="Search books..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-amber-500/50"
+                      className="w-full bg-theme-card border border-theme-border rounded-2xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-theme-accent/50"
                     />
                   </div>
                 </div>
 
                 <div className="flex-1 overflow-hidden flex">
                   {/* Books List */}
-                  <div className="w-1/2 overflow-y-auto border-right border-zinc-800 p-2">
+                  <div className="w-1/2 overflow-y-auto border-r border-theme-border p-2">
                     {filteredBooks.map(book => (
                       <button 
                         key={book.name}
@@ -450,8 +450,8 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                         }}
                         className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                           selectedBook.name === book.name 
-                            ? 'bg-amber-500 text-black' 
-                            : 'text-zinc-400 hover:bg-zinc-900'
+                            ? 'bg-theme-accent text-theme-bg' 
+                            : 'text-theme-muted hover:bg-theme-card'
                         }`}
                       >
                         {book.name}
@@ -472,8 +472,8 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                           }}
                           className={`aspect-square rounded-xl flex items-center justify-center text-sm font-bold border transition-all ${
                             selectedChapter === ch 
-                              ? 'bg-amber-500 border-amber-500 text-black' 
-                              : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                              ? 'bg-theme-accent border-theme-accent text-theme-bg' 
+                              : 'bg-theme-card border-theme-border text-theme-muted hover:border-theme-muted/50'
                           }`}
                         >
                           {ch}
@@ -487,18 +487,18 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
               <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="p-4">
                   <form onSubmit={handleSearch} className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
                     <input 
                       type="text"
                       placeholder="Search verses (e.g., Jesus, love, faith)..."
                       value={verseSearchQuery}
                       onChange={(e) => setVerseSearchQuery(e.target.value)}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-3 pl-10 pr-24 text-sm focus:outline-none focus:border-amber-500/50"
+                      className="w-full bg-theme-card border border-theme-border rounded-2xl py-3 pl-10 pr-24 text-sm focus:outline-none focus:border-theme-accent/50"
                     />
                     <button 
                       type="submit"
                       disabled={isSearching || !verseSearchQuery.trim()}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-amber-500 text-black rounded-xl text-xs font-bold disabled:opacity-50"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-theme-accent text-theme-bg rounded-xl text-xs font-bold disabled:opacity-50"
                     >
                       {isSearching ? 'Searching...' : 'Search'}
                     </button>
@@ -507,15 +507,15 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
 
                 <div className="flex-1 overflow-y-auto p-4">
                   {isSearching ? (
-                    <div className="h-full flex flex-col items-center justify-center text-zinc-500 gap-4">
-                      <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                    <div className="h-full flex flex-col items-center justify-center text-theme-muted gap-4">
+                      <Loader2 className="w-8 h-8 animate-spin text-theme-accent" />
                       <p className="text-sm font-medium">Searching scriptures...</p>
                     </div>
                   ) : searchError ? (
-                    <div className="text-center text-red-500 p-8">{searchError}</div>
+                    <div className="text-center text-theme-accent p-8">{searchError}</div>
                   ) : searchResults.length > 0 ? (
                     <div className="space-y-4">
-                      <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider mb-4">
+                      <p className="text-xs text-theme-muted font-medium uppercase tracking-wider mb-4">
                         Found {searchResults.length} results
                       </p>
                       {searchResults.map((result, idx) => {
@@ -532,16 +532,16 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                                 setIsPickerOpen(false);
                               }
                             }}
-                            className="w-full text-left p-4 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-800 transition-colors group"
+                            className="w-full text-left p-4 rounded-2xl bg-theme-card/50 border border-theme-border hover:bg-theme-card transition-colors group"
                           >
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-amber-500 text-xs font-bold uppercase tracking-wider">
+                              <span className="text-theme-accent text-xs font-bold uppercase tracking-wider">
                                 {bookName} {result.chapter}:{result.verse}
                               </span>
-                              <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-amber-500 transition-colors" />
+                              <ChevronRight className="w-4 h-4 text-theme-muted group-hover:text-theme-accent transition-colors" />
                             </div>
                             <p 
-                              className="text-sm text-zinc-300 leading-relaxed [&>b]:text-amber-500 [&>b]:font-bold"
+                              className="text-sm text-theme-text/80 leading-relaxed [&>b]:text-theme-accent [&>b]:font-bold"
                               dangerouslySetInnerHTML={{ __html: result.text }}
                             />
                           </button>
@@ -549,12 +549,12 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                       })}
                     </div>
                   ) : verseSearchQuery && !isSearching ? (
-                    <div className="h-full flex flex-col items-center justify-center text-zinc-500 p-8 text-center">
+                    <div className="h-full flex flex-col items-center justify-center text-theme-muted p-8 text-center">
                       <Search className="w-12 h-12 mb-4 opacity-20" />
                       <p>No results found for "{verseSearchQuery}"</p>
                     </div>
                   ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-zinc-600 p-8 text-center">
+                    <div className="h-full flex flex-col items-center justify-center text-theme-muted/60 p-8 text-center">
                       <BookOpen className="w-12 h-12 mb-4 opacity-20" />
                       <p>Enter a keyword or phrase to search the scriptures.</p>
                     </div>

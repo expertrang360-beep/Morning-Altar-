@@ -36,6 +36,11 @@ export default function App() {
     }
   }, [userData.onboarded, selectDailyDevotion]);
 
+  useEffect(() => {
+    const themeClass = userData.themeId && userData.themeId !== 'classic' ? `theme-${userData.themeId}` : '';
+    document.body.className = themeClass;
+  }, [userData.themeId]);
+
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const handleStartDevotion = () => {
@@ -72,7 +77,7 @@ export default function App() {
 
     if (currentView === 'devotion') {
       return (
-        <>
+        <div className="min-h-screen bg-theme-bg text-theme-text font-sans">
           <ErrorBoundary fallbackMessage="We encountered an issue loading today's devotion.">
             <DevotionFlow 
               devotion={currentDevotion} 
@@ -83,19 +88,19 @@ export default function App() {
           </ErrorBoundary>
           {showExitConfirm && (
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
-              <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-[2rem] max-w-xs w-full text-center">
+              <div className="bg-theme-card border border-theme-border p-8 rounded-[2rem] max-w-xs w-full text-center">
                 <h3 className="text-xl font-bold mb-2">Skip Today's Altar?</h3>
-                <p className="text-zinc-400 text-sm mb-8">Are you sure you want to skip your morning time with God?</p>
+                <p className="text-theme-muted text-sm mb-8">Are you sure you want to skip your morning time with God?</p>
                 <div className="flex flex-col gap-3">
                   <button 
                     onClick={confirmExit}
-                    className="w-full bg-zinc-800 text-white font-bold py-4 rounded-2xl hover:bg-zinc-700 transition-colors"
+                    className="w-full bg-theme-border text-theme-text font-bold py-4 rounded-2xl hover:bg-theme-card transition-colors"
                   >
                     Yes, Skip Today
                   </button>
                   <button 
                     onClick={() => setShowExitConfirm(false)}
-                    className="w-full bg-amber-500 text-black font-bold py-4 rounded-2xl hover:bg-amber-400 transition-colors"
+                    className="w-full bg-theme-accent text-black font-bold py-4 rounded-2xl hover:bg-theme-accent/80 transition-colors"
                   >
                     No, Stay Here
                   </button>
@@ -103,12 +108,12 @@ export default function App() {
               </div>
             </div>
           )}
-        </>
+        </div>
       );
     }
 
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-theme-bg text-theme-text font-sans">
         {currentView === 'home' ? (
           <Home 
             userData={userData} 
