@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
+import { Analytics } from '@vercel/analytics/react';
 import { useStorage } from './hooks/useStorage';
 import { useDailyReminder } from './hooks/useDailyReminder';
 import { Onboarding } from './components/Onboarding';
@@ -138,6 +139,7 @@ export default function App() {
         {showSplash && <SplashScreen />}
       </AnimatePresence>
       {renderContent()}
+      <Analytics />
     </>
   );
 }
