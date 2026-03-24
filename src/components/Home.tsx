@@ -444,7 +444,7 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
             <Play className={`w-5 h-5 ${searchQuery === '' ? 'fill-black' : ''}`} />
           </button>
           <button 
-            onClick={onNavigateBible}
+            onClick={() => onNavigateBible()}
             className="w-12 h-12 rounded-full flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
           >
             <BookOpen className="w-5 h-5" />

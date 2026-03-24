@@ -7,6 +7,7 @@ import { Home } from './components/Home';
 import { BibleReader } from './components/BibleReader';
 import { DevotionFlow } from './components/DevotionFlow';
 import { SplashScreen } from './components/SplashScreen';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { devotions } from './data/devotions';
 
 export default function App() {
@@ -51,7 +52,11 @@ export default function App() {
   };
 
   const handleNavigateBible = (book?: string, chapter?: number) => {
-    setBibleInitial({ book, chapter });
+    if (typeof book === 'string') {
+      setBibleInitial({ book, chapter });
+    } else {
+      setBibleInitial({});
+    }
     setCurrentView('bible');
   };
 
@@ -68,12 +73,14 @@ export default function App() {
     if (currentView === 'devotion') {
       return (
         <>
-          <DevotionFlow 
-            devotion={currentDevotion} 
-            streak={userData.streak}
-            onComplete={handleCompleteDevotion} 
-            onExit={handleExitDevotion} 
-          />
+          <ErrorBoundary fallbackMessage="We encountered an issue loading today's devotion.">
+            <DevotionFlow 
+              devotion={currentDevotion} 
+              streak={userData.streak}
+              onComplete={handleCompleteDevotion} 
+              onExit={handleExitDevotion} 
+            />
+          </ErrorBoundary>
           {showExitConfirm && (
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
               <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-[2rem] max-w-xs w-full text-center">
@@ -110,14 +117,16 @@ export default function App() {
             onUpdateUserData={updateUserData}
           />
         ) : (
-          <BibleReader 
-            onBack={() => {
-              setCurrentView('home');
-              setBibleInitial({});
-            }} 
-            initialBook={bibleInitial.book}
-            initialChapter={bibleInitial.chapter}
-          />
+          <ErrorBoundary fallbackMessage="We encountered an issue loading the Bible reader.">
+            <BibleReader 
+              onBack={() => {
+                setCurrentView('home');
+                setBibleInitial({});
+              }} 
+              initialBook={bibleInitial.book}
+              initialChapter={bibleInitial.chapter}
+            />
+          </ErrorBoundary>
         )}
       </div>
     );

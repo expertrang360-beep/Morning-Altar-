@@ -32,6 +32,16 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
     return BIBLE_BOOKS[0];
   });
   const [selectedChapter, setSelectedChapter] = useState(initialChapter || 1);
+
+  useEffect(() => {
+    if (initialBook) {
+      const book = BIBLE_BOOKS.find(b => b.name === initialBook);
+      if (book) setSelectedBook(book);
+    }
+    if (initialChapter) {
+      setSelectedChapter(initialChapter);
+    }
+  }, [initialBook, initialChapter]);
   const [chapterData, setChapterData] = useState<ChapterData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +50,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [targetVerse, setTargetVerse] = useState<number | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState('kjv');
   
   // Search state
   const [verseSearchQuery, setVerseSearchQuery] = useState('');
@@ -61,11 +72,11 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const fetchChapter = async (book: string, chapter: number) => {
+  const fetchChapter = async (book: string, chapter: number, version: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${chapter}`);
+      const response = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${chapter}?translation=${version}`);
       if (!response.ok) throw new Error('Failed to fetch scripture');
       const data = await response.json();
       setChapterData(data);
@@ -93,7 +104,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
   }, [chapterData, targetVerse]);
 
   useEffect(() => {
-    fetchChapter(selectedBook.name, selectedChapter);
+    fetchChapter(selectedBook.name, selectedChapter, selectedVersion);
     
     // Reset audio when chapter changes
     if (audioRef.current) {
@@ -105,7 +116,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
       audioRef.current.load();
       setIsPlaying(false);
     }
-  }, [selectedBook, selectedChapter]);
+  }, [selectedBook, selectedChapter, selectedVersion]);
 
   const handlePlayAudio = async () => {
     if (isPlaying) {
@@ -189,7 +200,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
     setIsSearching(true);
     setSearchError(null);
     try {
-      const response = await fetch(`https://bolls.life/search/KJV/?search=${encodeURIComponent(verseSearchQuery)}`);
+      const response = await fetch(`https://bolls.life/search/${selectedVersion.toUpperCase()}/?search=${encodeURIComponent(verseSearchQuery)}`);
       if (!response.ok) throw new Error('Search failed');
       const data = await response.json();
       setSearchResults(data);
@@ -202,7 +213,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black text-zinc-100 font-sans relative overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-black text-zinc-100 font-sans relative overflow-hidden">
       {/* Focus Mode Background */}
       <AnimatePresence>
         {isFocusMode && (
@@ -236,7 +247,18 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
           <ChevronRight className="w-4 h-4 rotate-90 text-amber-500" />
         </button>
 
-        <div className="w-10" /> {/* Spacer */}
+        <div className="relative">
+          <select
+            value={selectedVersion}
+            onChange={(e) => setSelectedVersion(e.target.value)}
+            className="bg-zinc-900 border border-zinc-800 rounded-full pl-4 pr-8 py-2 text-xs font-bold text-zinc-300 outline-none appearance-none cursor-pointer hover:bg-zinc-800 transition-colors"
+          >
+            <option value="kjv">KJV</option>
+            <option value="web">WEB</option>
+            <option value="bbe">BBE</option>
+          </select>
+          <ChevronRight className="w-3 h-3 rotate-90 text-zinc-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        </div>
       </header>
 
       {/* Focus Mode Toggle */}
@@ -261,7 +283,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
             </div>
             <p className="text-zinc-400 mb-6">{error}</p>
             <button 
-              onClick={() => fetchChapter(selectedBook.name, selectedChapter)}
+              onClick={() => fetchChapter(selectedBook.name, selectedChapter, selectedVersion)}
               className="px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-2xl text-sm font-bold hover:bg-zinc-800 transition-colors"
             >
               Try Again
@@ -335,9 +357,9 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                 <div 
                   key={v.verse} 
                   id={`verse-${v.verse}`}
-                  className="group relative"
+                  className="group relative pl-8 md:pl-0"
                 >
-                  <span className={`absolute -left-8 top-1 text-[10px] font-bold transition-all duration-500 ${isFocusMode ? 'opacity-20' : 'text-zinc-600 group-hover:text-amber-500'} ${targetVerse === v.verse ? '!text-amber-500 scale-125' : ''}`}>
+                  <span className={`absolute left-0 md:-left-8 top-1.5 md:top-1 text-[10px] font-bold transition-all duration-500 ${isFocusMode ? 'opacity-20' : 'text-zinc-600 group-hover:text-amber-500'} ${targetVerse === v.verse ? '!text-amber-500 scale-125' : ''}`}>
                     {v.verse}
                   </span>
                   <p className={`leading-relaxed font-light transition-all duration-500 ${isFocusMode ? 'text-2xl leading-[1.8] text-zinc-100' : 'text-xl'} ${targetVerse === v.verse ? 'text-amber-400 font-normal drop-shadow-md' : 'text-zinc-300'}`}>
