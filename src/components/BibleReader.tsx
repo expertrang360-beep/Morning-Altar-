@@ -39,6 +39,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
   const [pickerTab, setPickerTab] = useState<'browse' | 'search'>('browse');
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [targetVerse, setTargetVerse] = useState<number | null>(null);
   
   // Search state
   const [verseSearchQuery, setVerseSearchQuery] = useState('');
@@ -68,9 +69,6 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
       if (!response.ok) throw new Error('Failed to fetch scripture');
       const data = await response.json();
       setChapterData(data);
-      if (scrollRef.current) {
-        scrollRef.current.scrollTo(0, 0);
-      }
     } catch (err) {
       setError('Could not load scripture. Please check your connection.');
       console.error(err);
@@ -78,6 +76,21 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (chapterData && scrollRef.current) {
+      if (targetVerse) {
+        setTimeout(() => {
+          const verseElement = document.getElementById(`verse-${targetVerse}`);
+          if (verseElement) {
+            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      } else {
+        scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, [chapterData, targetVerse]);
 
   useEffect(() => {
     fetchChapter(selectedBook.name, selectedChapter);
@@ -139,6 +152,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
   };
 
   const handleNextChapter = () => {
+    setTargetVerse(null);
     if (selectedChapter < selectedBook.chapters) {
       setSelectedChapter(prev => prev + 1);
     } else {
@@ -151,6 +165,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
   };
 
   const handlePrevChapter = () => {
+    setTargetVerse(null);
     if (selectedChapter > 1) {
       setSelectedChapter(prev => prev - 1);
     } else {
@@ -317,11 +332,15 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
 
             <div className={`space-y-8 transition-all duration-500 ${isFocusMode ? 'space-y-12' : 'space-y-8'}`}>
               {chapterData?.verses.map((v) => (
-                <div key={v.verse} className="group relative">
-                  <span className={`absolute -left-8 top-1 text-[10px] font-bold transition-all duration-500 ${isFocusMode ? 'opacity-20' : 'text-zinc-600 group-hover:text-amber-500'}`}>
+                <div 
+                  key={v.verse} 
+                  id={`verse-${v.verse}`}
+                  className="group relative"
+                >
+                  <span className={`absolute -left-8 top-1 text-[10px] font-bold transition-all duration-500 ${isFocusMode ? 'opacity-20' : 'text-zinc-600 group-hover:text-amber-500'} ${targetVerse === v.verse ? '!text-amber-500 scale-125' : ''}`}>
                     {v.verse}
                   </span>
-                  <p className={`leading-relaxed text-zinc-300 font-light transition-all duration-500 ${isFocusMode ? 'text-2xl leading-[1.8] text-zinc-100' : 'text-xl'}`}>
+                  <p className={`leading-relaxed font-light transition-all duration-500 ${isFocusMode ? 'text-2xl leading-[1.8] text-zinc-100' : 'text-xl'} ${targetVerse === v.verse ? 'text-amber-400 font-normal drop-shadow-md' : 'text-zinc-300'}`}>
                     {v.text}
                   </p>
                 </div>
@@ -405,6 +424,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                         onClick={() => {
                           setSelectedBook(book);
                           setSelectedChapter(1);
+                          setTargetVerse(null);
                         }}
                         className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                           selectedBook.name === book.name 
@@ -425,6 +445,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                           key={ch}
                           onClick={() => {
                             setSelectedChapter(ch);
+                            setTargetVerse(null);
                             setIsPickerOpen(false);
                           }}
                           className={`aspect-square rounded-xl flex items-center justify-center text-sm font-bold border transition-all ${
@@ -485,6 +506,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                               if (book) {
                                 setSelectedBook(book);
                                 setSelectedChapter(result.chapter);
+                                setTargetVerse(result.verse);
                                 setIsPickerOpen(false);
                               }
                             }}
@@ -497,7 +519,7 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                               <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-amber-500 transition-colors" />
                             </div>
                             <p 
-                              className="text-sm text-zinc-300 leading-relaxed"
+                              className="text-sm text-zinc-300 leading-relaxed [&>b]:text-amber-500 [&>b]:font-bold"
                               dangerouslySetInnerHTML={{ __html: result.text }}
                             />
                           </button>

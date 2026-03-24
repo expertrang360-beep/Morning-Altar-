@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BibleReader</string>
+    <string name="title_activity_main">BibleReader</string>
+    <string name="package_name">com.biblereader.app</string>
+    <string name="custom_url_scheme">com.biblereader.app</string>
+</resources>
