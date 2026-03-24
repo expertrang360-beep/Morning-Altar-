@@ -11,14 +11,30 @@ interface PrayerRequestsProps {
 export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsProps) {
   const [newRequest, setNewRequest] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAdd = (e: FormEvent) => {
     e.preventDefault();
-    if (!newRequest.trim()) return;
+    const trimmedRequest = newRequest.trim();
+    
+    if (!trimmedRequest) {
+      setError('Please enter a prayer request.');
+      return;
+    }
+    
+    if (trimmedRequest.length < 3) {
+      setError('Prayer request must be at least 3 characters long.');
+      return;
+    }
+    
+    if (trimmedRequest.length > 500) {
+      setError('Prayer request cannot exceed 500 characters.');
+      return;
+    }
 
     const request: PrayerRequest = {
       id: crypto.randomUUID(),
-      text: newRequest.trim(),
+      text: trimmedRequest,
       createdAt: new Date().toISOString(),
       isAnswered: false
     };
@@ -27,7 +43,13 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
       prayerRequests: [request, ...(userData.prayerRequests || [])]
     });
     setNewRequest('');
+    setError(null);
     setIsAdding(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewRequest(e.target.value);
+    if (error) setError(null);
   };
 
   const toggleAnswered = (id: string) => {
@@ -69,22 +91,27 @@ export function PrayerRequests({ userData, onUpdateUserData }: PrayerRequestsPro
             onSubmit={handleAdd}
             className="mb-4 overflow-hidden"
           >
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newRequest}
-                onChange={(e) => setNewRequest(e.target.value)}
-                placeholder="What are you praying for?"
-                className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-2xl py-3 px-4 text-zinc-200 focus:outline-none focus:border-amber-500/50 transition-colors text-sm"
-                autoFocus
-              />
-              <button 
-                type="submit"
-                disabled={!newRequest.trim()}
-                className="bg-amber-500 text-black px-4 rounded-2xl font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add
-              </button>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newRequest}
+                  onChange={handleInputChange}
+                  placeholder="What are you praying for?"
+                  className={`flex-1 bg-zinc-900/50 border ${error ? 'border-red-500/50 focus:border-red-500' : 'border-zinc-800 focus:border-amber-500/50'} rounded-2xl py-3 px-4 text-zinc-200 focus:outline-none transition-colors text-sm`}
+                  autoFocus
+                />
+                <button 
+                  type="submit"
+                  disabled={!newRequest.trim()}
+                  className="bg-amber-500 text-black px-4 rounded-2xl font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Add
+                </button>
+              </div>
+              {error && (
+                <p className="text-red-500 text-xs px-2">{error}</p>
+              )}
             </div>
           </motion.form>
         )}

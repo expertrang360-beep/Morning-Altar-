@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Clock, Bell, BookOpen } from 'lucide-react';
+import { X, Clock, Bell, BookOpen, HelpCircle, Mail, Globe, ExternalLink, ChevronRight } from 'lucide-react';
 import { UserData, StudyPlanType } from '../types';
 
 interface SettingsProps {
@@ -47,9 +47,9 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-zinc-900 border border-zinc-800 p-8 rounded-[2rem] w-full max-w-sm"
+        className="bg-zinc-900 border border-zinc-800 p-8 rounded-[2rem] w-full max-w-sm flex flex-col max-h-[90vh]"
       >
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 flex-shrink-0">
           <h2 className="text-2xl font-bold text-white">Settings</h2>
           <button 
             onClick={onClose}
@@ -59,7 +59,7 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto pr-2 pb-4 flex-1 custom-scrollbar">
           {/* Devotion Time */}
           <div>
             <label className="flex items-center gap-2 text-sm font-bold text-zinc-400 uppercase tracking-widest mb-3">
@@ -124,11 +124,49 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
               ))}
             </div>
           </div>
+
+          {/* Support & Contact */}
+          <div className="pt-4 border-t border-zinc-800">
+            <label className="flex items-center gap-2 text-sm font-bold text-zinc-400 uppercase tracking-widest mb-3">
+              <HelpCircle className="w-4 h-4" /> Support & Contact
+            </label>
+            <div className="space-y-3">
+              <a 
+                href="mailto:smarttechpro2021@gmail.com"
+                className="w-full p-4 rounded-2xl bg-zinc-800 border border-zinc-700 text-zinc-300 hover:border-zinc-600 transition-all flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-amber-500" />
+                  <span className="font-medium text-sm">Email Support</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-zinc-500" />
+              </a>
+              
+              <a 
+                href="https://smarttechprotech.netlify.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full p-4 rounded-2xl bg-zinc-800 border border-zinc-700 text-zinc-300 hover:border-zinc-600 transition-all flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <Globe className="w-5 h-5 text-amber-500" />
+                  <span className="font-medium text-sm">Visit Our Website</span>
+                </div>
+                <ExternalLink className="w-4 h-4 text-zinc-500" />
+              </a>
+
+              <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl mt-4">
+                <p className="text-xs text-amber-500/90 leading-relaxed">
+                  <strong className="font-bold">Claiming Gifts:</strong> To claim your rewards, please take a screenshot of your dashboard showing your points and email it to us!
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <button 
           onClick={handleSave}
-          className="w-full mt-8 bg-amber-500 text-black font-bold py-4 rounded-2xl hover:bg-amber-400 transition-colors"
+          className="w-full mt-6 flex-shrink-0 bg-amber-500 text-black font-bold py-4 rounded-2xl hover:bg-amber-400 transition-colors"
         >
           Save Changes
         </button>

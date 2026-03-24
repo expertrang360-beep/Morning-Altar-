@@ -12,12 +12,26 @@ interface MeditationStepProps {
 export function MeditationStep({ script, theme, onComplete }: MeditationStepProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const loadedIndexRef = useRef<number | null>(null);
 
   const playLine = async (index: number) => {
     if (index >= script.length) {
       setIsPlaying(false);
+      setIsPaused(false);
+      setHasStarted(false);
+      return;
+    }
+
+    // If we already have this line loaded and we are just resuming
+    if (loadedIndexRef.current === index && audioRef.current) {
+      audioRef.current.play();
+      setIsPlaying(true);
+      setIsPaused(false);
       return;
     }
 
@@ -34,36 +48,69 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
           audioRef.current = new Audio(audioData);
         }
 
+        loadedIndexRef.current = index;
+
         audioRef.current.onended = () => {
-          if (isPlaying && index + 1 < script.length) {
+          if (index + 1 < script.length) {
             setCurrentIndex(index + 1);
-          } else if (index + 1 === script.length) {
+          } else {
             setIsPlaying(false);
+            setIsPaused(false);
+            setHasStarted(false);
           }
         };
 
         await audioRef.current.play();
+        setIsPlaying(true);
+        setIsPaused(false);
+        setHasStarted(true);
       }
     } catch (error) {
       console.error("Meditation audio error:", error);
       setIsPlaying(false);
+      setIsPaused(false);
     } finally {
       setIsGenerating(false);
     }
   };
 
   useEffect(() => {
-    if (isPlaying) {
+    if (hasStarted && !isPaused) {
       playLine(currentIndex);
-    } else {
+    }
+  }, [currentIndex]);
+
+  useEffect(() => {
+    return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        if (audioRef.current.src.startsWith('blob:')) {
+          URL.revokeObjectURL(audioRef.current.src);
+        }
       }
-    }
-  }, [currentIndex, isPlaying]);
+    };
+  }, []);
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+  const handleStart = () => {
+    playLine(currentIndex);
+  };
+
+  const handlePause = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setIsPlaying(false);
+    setIsPaused(true);
+  };
+
+  const handleResume = () => {
+    if (audioRef.current && loadedIndexRef.current === currentIndex) {
+      audioRef.current.play();
+      setIsPlaying(true);
+      setIsPaused(false);
+    } else {
+      playLine(currentIndex);
+    }
   };
 
   return (
@@ -103,22 +150,36 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
       </div>
 
       <div className="flex flex-col gap-6 w-full max-w-xs">
-        <div className="flex gap-4">
+        {!hasStarted ? (
           <button 
-            onClick={togglePlay}
+            onClick={handleStart}
             disabled={isGenerating}
-            className="flex-1 bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-center gap-2 text-white hover:bg-zinc-800 transition-all disabled:opacity-50"
+            className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-center gap-2 text-white hover:bg-zinc-800 transition-all disabled:opacity-50"
           >
-            {isGenerating ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : isPlaying ? (
-              <Pause className="w-5 h-5" />
-            ) : (
-              <Play className="w-5 h-5" />
-            )}
-            {isGenerating ? 'Loading...' : isPlaying ? 'Pause' : 'Start Guidance'}
+            {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5" />}
+            {isGenerating ? 'Loading...' : 'Start Guidance'}
           </button>
-        </div>
+        ) : (
+          <div className="flex gap-4">
+            {isPlaying ? (
+              <button 
+                onClick={handlePause}
+                disabled={isGenerating}
+                className="flex-1 bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-center gap-2 text-white hover:bg-zinc-800 transition-all disabled:opacity-50"
+              >
+                {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Pause className="w-5 h-5" />}
+                {isGenerating ? 'Loading...' : 'Pause'}
+              </button>
+            ) : (
+              <button 
+                onClick={handleResume}
+                className="flex-1 bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-center gap-2 text-white hover:bg-zinc-800 transition-all"
+              >
+                <Play className="w-5 h-5" /> Resume
+              </button>
+            )}
+          </div>
+        )}
 
         <button 
           onClick={onComplete}

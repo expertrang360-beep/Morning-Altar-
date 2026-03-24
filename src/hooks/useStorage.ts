@@ -9,6 +9,7 @@ const DEFAULT_USER_DATA: UserData = {
   devotionTime: '06:00',
   sessionLength: 10,
   streak: 0,
+  points: 0,
   lastCompletedDate: null,
   reflections: [],
   currentDevotionId: null,
@@ -25,6 +26,10 @@ export function useStorage() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
+        // Backfill points for existing users if missing
+        if (parsed.points === undefined) {
+          parsed.points = parsed.streak || 0;
+        }
         return { ...DEFAULT_USER_DATA, ...parsed };
       } catch (e) {
         console.error("Error parsing stored user data:", e);
@@ -99,16 +104,26 @@ export function useStorage() {
     const lastDate = userData.lastCompletedDate;
     
     let newStreak = userData.streak;
+    let newPoints = userData.points || 0;
+    
     if (lastDate) {
       const last = new Date(lastDate);
       const diff = (new Date(today).getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
       if (diff === 1) {
         newStreak += 1;
+        newPoints += 1; // 1 point per day
+        
+        // Bonus for 1 year streak
+        if (newStreak % 365 === 0) {
+          newPoints += 100; // Bonus points for maintaining a 1-year streak
+        }
       } else if (diff > 1) {
         newStreak = 1;
+        newPoints += 1; // Start earning again
       }
     } else {
       newStreak = 1;
+      newPoints += 1;
     }
 
     const newReflection: ReflectionEntry = {
@@ -126,6 +141,7 @@ export function useStorage() {
     setUserData(prev => ({
       ...prev,
       streak: newStreak,
+      points: newPoints,
       lastCompletedDate: today,
       reflections: [newReflection, ...prev.reflections].slice(0, 30),
       recentDevotionIds: newRecentIds

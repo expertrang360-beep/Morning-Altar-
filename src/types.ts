@@ -25,6 +25,7 @@ export interface UserData {
   devotionTime: string;
   sessionLength: number;
   streak: number;
+  points: number;
   lastCompletedDate: string | null;
   reflections: ReflectionEntry[];
   currentDevotionId: string | null;

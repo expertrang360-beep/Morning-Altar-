@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Flame, Play, History, Settings as SettingsIcon, Search, BookOpen, X, Volume2, Book, Loader2, Wind, Quote } from 'lucide-react';
+import { Calendar, Flame, Play, History, Settings as SettingsIcon, Search, BookOpen, X, Volume2, Book, Loader2, Wind, Quote, Gift } from 'lucide-react';
 import { UserData, Devotion } from '../types';
 import { devotions } from '../data/devotions';
 import { calculateDailyReading, calculatePlanProgress } from '../data/biblePlanHelper';
@@ -10,6 +10,7 @@ import { MeditationStep } from './MeditationStep';
 import { Settings } from './Settings';
 import { PrayerRequests } from './PrayerRequests';
 import { VerseOfTheDay } from './VerseOfTheDay';
+import { Rewards } from './Rewards';
 
 interface HomeProps {
   userData: UserData;
@@ -40,6 +41,7 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
   const [selectedDevotion, setSelectedDevotion] = useState<Devotion | null>(null);
   const [activeMeditation, setActiveMeditation] = useState<Devotion | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showRewards, setShowRewards] = useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -455,6 +457,12 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
           <button className="w-12 h-12 rounded-full flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
             <History className="w-5 h-5" />
           </button>
+          <button 
+            onClick={() => setShowRewards(true)}
+            className="w-12 h-12 rounded-full flex items-center justify-center text-zinc-500 hover:text-amber-500 transition-colors"
+          >
+            <Gift className="w-5 h-5" />
+          </button>
         </div>
       </nav>
 
@@ -464,6 +472,16 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
             userData={userData}
             onClose={() => setShowSettings(false)}
             onUpdate={onUpdateUserData}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showRewards && (
+          <Rewards 
+            userData={userData}
+            onClose={() => setShowRewards(false)}
+            onUpdateUserData={onUpdateUserData}
           />
         )}
       </AnimatePresence>
