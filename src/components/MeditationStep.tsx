@@ -2,13 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Volume2, VolumeX, Loader2, ChevronRight, Play, Pause, Music } from 'lucide-react';
 import { generateSpeech } from '../services/ttsService';
-
-const AMBIENT_SOUNDS: Record<string, string> = {
-  'Gratitude & Joy': 'https://cdn.freesound.org/previews/415/415510_6044691-lq.mp3', // Ocean waves
-  'Inner Peace': 'https://cdn.freesound.org/previews/531/531947_11161553-lq.mp3', // Rain
-  'Clarity of Mind': 'https://cdn.freesound.org/previews/515/515822_10985456-lq.mp3', // Forest/Wind
-  'default': 'https://cdn.freesound.org/previews/531/531947_11161553-lq.mp3'
-};
+import { useAmbientAudio, MusicStyle } from '../hooks/useAmbientAudio';
 
 interface MeditationStepProps {
   script: string[];
@@ -23,35 +17,20 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [isAmbientMuted, setIsAmbientMuted] = useState(false);
+  const [musicStyle, setMusicStyle] = useState<MusicStyle>('inspirational');
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const ambientRef = useRef<HTMLAudioElement | null>(null);
   const loadedIndexRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (ambientRef.current) {
-      ambientRef.current.volume = 0.3; // Low background volume
-    }
-  }, []);
-
-  useEffect(() => {
-    if (ambientRef.current) {
-      ambientRef.current.muted = isAmbientMuted;
-    }
-  }, [isAmbientMuted]);
+  // Use synthesized ambient audio to avoid cross-browser audio format and CORS issues
+  useAmbientAudio(musicStyle, isAmbientMuted, hasStarted && !isPaused);
 
   const playLine = async (index: number) => {
     if (index >= script.length) {
       setIsPlaying(false);
       setIsPaused(false);
       setHasStarted(false);
-      if (ambientRef.current) ambientRef.current.pause();
       return;
-    }
-
-    // Start ambient if not playing
-    if (ambientRef.current && ambientRef.current.paused && !isPaused) {
-      ambientRef.current.play().catch(e => console.error("Ambient play error:", e));
     }
 
     // If we already have this line loaded and we are just resuming
@@ -84,7 +63,6 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
               setIsPlaying(false);
               setIsPaused(false);
               setHasStarted(false);
-              if (ambientRef.current) ambientRef.current.pause();
             }
           };
 
@@ -105,7 +83,6 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
             setIsPlaying(false);
             setIsPaused(false);
             setHasStarted(false);
-            if (ambientRef.current) ambientRef.current.pause();
           }
         }, 5000); // Wait 5 seconds for the user to read
       }
@@ -137,9 +114,6 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
 
   const handleStart = () => {
     // Synchronously unlock audio elements on user interaction
-    if (ambientRef.current) {
-      ambientRef.current.play().catch(e => console.error("Ambient start error:", e));
-    }
     if (audioRef.current) {
       audioRef.current.play().then(() => {
         audioRef.current?.pause();
@@ -152,17 +126,11 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
     if (audioRef.current) {
       audioRef.current.pause();
     }
-    if (ambientRef.current) {
-      ambientRef.current.pause();
-    }
     setIsPlaying(false);
     setIsPaused(true);
   };
 
   const handleResume = () => {
-    if (ambientRef.current) {
-      ambientRef.current.play().catch(e => console.error("Ambient resume error:", e));
-    }
     if (audioRef.current && loadedIndexRef.current === currentIndex) {
       audioRef.current.play();
       setIsPlaying(true);
@@ -174,15 +142,33 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
 
   return (
     <div className="flex flex-col items-center text-center w-full max-w-md">
-      <div className="flex items-center justify-between w-full mb-4 px-4">
-        <div className="w-10" /> {/* Spacer */}
-        <p className="text-theme-accent text-xs font-bold uppercase tracking-widest">Guided Meditation</p>
+      <div className="flex items-center justify-between w-full mb-4 px-4 relative">
+        <div className="flex items-center">
+          <div className="relative group">
+            <select 
+              value={musicStyle}
+              onChange={(e) => setMusicStyle(e.target.value as MusicStyle)}
+              className="bg-theme-card border border-theme-border text-theme-text text-xs rounded-full pl-8 pr-3 py-1.5 outline-none focus:ring-1 focus:ring-theme-accent appearance-none cursor-pointer transition-colors hover:border-theme-accent"
+            >
+              <option value="inspirational">Inspirational</option>
+              <option value="emotional">Emotional</option>
+              <option value="motivational">Motivational</option>
+              <option value="nature">Nature Sounds</option>
+            </select>
+            <Music className="w-3.5 h-3.5 text-theme-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-theme-accent transition-colors" />
+          </div>
+        </div>
+        
+        <p className="text-theme-accent text-xs font-bold uppercase tracking-widest absolute left-1/2 -translate-x-1/2 pointer-events-none hidden sm:block">
+          Guided Meditation
+        </p>
+        
         <button 
           onClick={() => setIsAmbientMuted(!isAmbientMuted)}
-          className="w-10 h-10 rounded-full bg-theme-card border border-theme-border flex items-center justify-center text-theme-muted hover:text-theme-accent transition-colors"
+          className="w-10 h-10 rounded-full bg-theme-card border border-theme-border flex items-center justify-center text-theme-muted hover:text-theme-accent transition-colors z-10"
           title={isAmbientMuted ? "Unmute Background" : "Mute Background"}
         >
-          {isAmbientMuted ? <VolumeX className="w-4 h-4" /> : <Music className="w-4 h-4" />}
+          {isAmbientMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
         </button>
       </div>
       <h2 className="text-2xl font-bold mb-12 leading-tight">
@@ -271,7 +257,6 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
       
       {/* Hidden audio elements to ensure browser compatibility and autoplay policies */}
       <audio ref={audioRef} className="hidden" />
-      <audio ref={ambientRef} src={AMBIENT_SOUNDS[theme] || AMBIENT_SOUNDS['default']} loop className="hidden" />
     </div>
   );
 }
