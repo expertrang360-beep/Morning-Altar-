@@ -1,6 +1,6 @@
 import { Devotion } from '../types';
 
-export const devotions: Devotion[] = [
+const rawDevotions: Omit<Devotion, 'plan'>[] = [
   {
     id: '1',
     theme: 'Strength for Today',
@@ -728,3 +728,10 @@ export const devotions: Devotion[] = [
     reflectionPrompt: 'How does it feel to know that God takes great delight in you?'
   }
 ];
+
+export const devotions: Devotion[] = rawDevotions.map((d, i) => {
+  let plan: 'Faith' | 'Discipline' | 'Purpose' = 'Faith';
+  if (i >= 17 && i < 34) plan = 'Discipline';
+  if (i >= 34) plan = 'Purpose';
+  return { ...d, plan };
+});

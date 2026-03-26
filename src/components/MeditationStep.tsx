@@ -4,10 +4,10 @@ import { Volume2, VolumeX, Loader2, ChevronRight, Play, Pause, Music } from 'luc
 import { generateSpeech } from '../services/ttsService';
 
 const AMBIENT_SOUNDS: Record<string, string> = {
-  'Gratitude & Joy': 'https://cdn.pixabay.com/audio/2022/05/27/audio_180873747b.mp3',
-  'Inner Peace': 'https://cdn.pixabay.com/audio/2022/03/24/audio_78390a246c.mp3',
-  'Clarity of Mind': 'https://cdn.pixabay.com/audio/2022/01/21/audio_31743c589f.mp3',
-  'default': 'https://cdn.pixabay.com/audio/2022/03/24/audio_78390a246c.mp3'
+  'Gratitude & Joy': 'https://cdn.freesound.org/previews/415/415510_6044691-lq.mp3', // Ocean waves
+  'Inner Peace': 'https://cdn.freesound.org/previews/531/531947_11161553-lq.mp3', // Rain
+  'Clarity of Mind': 'https://cdn.freesound.org/previews/515/515822_10985456-lq.mp3', // Forest/Wind
+  'default': 'https://cdn.freesound.org/previews/531/531947_11161553-lq.mp3'
 };
 
 interface MeditationStepProps {
@@ -29,19 +29,10 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
   const loadedIndexRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Initialize ambient audio
-    const soundUrl = AMBIENT_SOUNDS[theme] || AMBIENT_SOUNDS['default'];
-    ambientRef.current = new Audio(soundUrl);
-    ambientRef.current.loop = true;
-    ambientRef.current.volume = 0.3; // Low background volume
-
-    return () => {
-      if (ambientRef.current) {
-        ambientRef.current.pause();
-        ambientRef.current = null;
-      }
-    };
-  }, [theme]);
+    if (ambientRef.current) {
+      ambientRef.current.volume = 0.3; // Low background volume
+    }
+  }, []);
 
   useEffect(() => {
     if (ambientRef.current) {
@@ -64,8 +55,8 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
     }
 
     // If we already have this line loaded and we are just resuming
-    if (loadedIndexRef.current === index && audioRef.current) {
-      audioRef.current.play();
+    if (loadedIndexRef.current === index && audioRef.current && audioRef.current.src) {
+      audioRef.current.play().catch(e => console.error("Audio play error:", e));
       setIsPlaying(true);
       setIsPaused(false);
       return;
@@ -76,17 +67,38 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
       const audioData = await generateSpeech(script[index]);
       if (audioData) {
         if (audioRef.current) {
-          if (audioRef.current.src.startsWith('blob:')) {
+          if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {
             URL.revokeObjectURL(audioRef.current.src);
           }
           audioRef.current.src = audioData;
-        } else {
-          audioRef.current = new Audio(audioData);
+          audioRef.current.load();
         }
 
         loadedIndexRef.current = index;
 
-        audioRef.current.onended = () => {
+        if (audioRef.current) {
+          audioRef.current.onended = () => {
+            if (index + 1 < script.length) {
+              setCurrentIndex(index + 1);
+            } else {
+              setIsPlaying(false);
+              setIsPaused(false);
+              setHasStarted(false);
+              if (ambientRef.current) ambientRef.current.pause();
+            }
+          };
+
+          await audioRef.current.play();
+          setIsPlaying(true);
+          setIsPaused(false);
+          setHasStarted(true);
+        }
+      } else {
+        // Fallback if audio generation fails: just show text and wait a bit
+        setIsPlaying(true);
+        setIsPaused(false);
+        setHasStarted(true);
+        setTimeout(() => {
           if (index + 1 < script.length) {
             setCurrentIndex(index + 1);
           } else {
@@ -95,12 +107,7 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
             setHasStarted(false);
             if (ambientRef.current) ambientRef.current.pause();
           }
-        };
-
-        await audioRef.current.play();
-        setIsPlaying(true);
-        setIsPaused(false);
-        setHasStarted(true);
+        }, 5000); // Wait 5 seconds for the user to read
       }
     } catch (error) {
       console.error("Meditation audio error:", error);
@@ -129,6 +136,15 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
   }, []);
 
   const handleStart = () => {
+    // Synchronously unlock audio elements on user interaction
+    if (ambientRef.current) {
+      ambientRef.current.play().catch(e => console.error("Ambient start error:", e));
+    }
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        audioRef.current?.pause();
+      }).catch(() => {});
+    }
     playLine(currentIndex);
   };
 
@@ -252,6 +268,10 @@ export function MeditationStep({ script, theme, onComplete }: MeditationStepProp
           />
         ))}
       </div>
+      
+      {/* Hidden audio elements to ensure browser compatibility and autoplay policies */}
+      <audio ref={audioRef} className="hidden" />
+      <audio ref={ambientRef} src={AMBIENT_SOUNDS[theme] || AMBIENT_SOUNDS['default']} loop className="hidden" />
     </div>
   );
 }

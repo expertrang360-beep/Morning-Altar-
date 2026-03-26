@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { UserData, ReflectionEntry, Devotion, StudyPlanType } from '../types';
+import { UserData, ReflectionEntry, Devotion, StudyPlanType, DevotionPlanType } from '../types';
 import { devotions } from '../data/devotions';
 
 const STORAGE_KEY = 'morning_altar_user_data';
@@ -47,7 +47,7 @@ export function useStorage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
   }, [userData]);
 
-  const updateOnboarding = (devotionTime: string, sessionLength: number, studyPlan: StudyPlanType = 'none', username?: string, email?: string) => {
+  const updateOnboarding = (devotionTime: string, sessionLength: number, studyPlan: StudyPlanType = 'none', username?: string, email?: string, devotionPlan?: DevotionPlanType) => {
     setUserData(prev => ({
       ...prev,
       onboarded: true,
@@ -56,7 +56,8 @@ export function useStorage() {
       devotionTime,
       sessionLength,
       studyPlan,
-      studyPlanStartDate: studyPlan !== 'none' ? new Date().toISOString() : null
+      studyPlanStartDate: studyPlan !== 'none' ? new Date().toISOString() : null,
+      devotionPlan: devotionPlan || prev.devotionPlan || 'Faith'
     }));
   };
 
@@ -85,12 +86,13 @@ export function useStorage() {
     }
 
     // Otherwise, pick a new one
-    // Filter out devotions that are in the recent list
+    // Filter out devotions that are in the recent list and match the plan
     const recentIds = userData.recentDevotionIds || [];
-    const available = devotions.filter(d => !recentIds.includes(d.id));
+    const planDevotions = devotions.filter(d => d.plan === (userData.devotionPlan || 'Faith'));
+    const available = planDevotions.filter(d => !recentIds.includes(d.id));
     
     // If we've seen everything recently, reset the recent list for selection
-    const pool = available.length > 0 ? available : devotions;
+    const pool = available.length > 0 ? available : planDevotions;
     
     const randomIndex = Math.floor(Math.random() * pool.length);
     const selected = pool[randomIndex];
@@ -103,7 +105,7 @@ export function useStorage() {
     }));
 
     return selected;
-  }, [userData.lastDevotionDate, userData.currentDevotionId, userData.recentDevotionIds]);
+  }, [userData.lastDevotionDate, userData.currentDevotionId, userData.recentDevotionIds, userData.devotionPlan]);
 
   const completeDevotion = (reflection: string, theme: string) => {
     const today = new Date().toISOString().split('T')[0];

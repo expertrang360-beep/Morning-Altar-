@@ -1,6 +1,9 @@
+export type DevotionPlanType = 'Faith' | 'Discipline' | 'Purpose';
+
 export interface Devotion {
   id: string;
   theme: string;
+  plan?: DevotionPlanType;
   affirmation: string;
   scripture: {
     reference: string;
@@ -38,6 +41,7 @@ export interface UserData {
   lastDevotionDate: string | null;
   studyPlan: StudyPlanType;
   studyPlanStartDate: string | null;
+  devotionPlan?: DevotionPlanType;
   prayerRequests: PrayerRequest[];
   themeId?: ThemeId;
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Clock, Bell, BookOpen, HelpCircle, Mail, Globe, ExternalLink, ChevronRight, User, Palette } from 'lucide-react';
-import { UserData, StudyPlanType, ThemeId } from '../types';
+import { X, Clock, Bell, BookOpen, HelpCircle, Mail, Globe, ExternalLink, ChevronRight, User, Palette, Heart } from 'lucide-react';
+import { UserData, StudyPlanType, ThemeId, DevotionPlanType } from '../types';
 
 interface SettingsProps {
   userData: UserData;
@@ -12,6 +12,7 @@ interface SettingsProps {
 export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
   const [time, setTime] = useState(userData.devotionTime);
   const [studyPlan, setStudyPlan] = useState<StudyPlanType>(userData.studyPlan);
+  const [devotionPlan, setDevotionPlan] = useState<DevotionPlanType>(userData.devotionPlan || 'Faith');
   const [username, setUsername] = useState(userData.username || '');
   const [email, setEmail] = useState(userData.email || '');
   const [themeId, setThemeId] = useState<ThemeId>(userData.themeId || 'classic');
@@ -34,6 +35,7 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
     const updates: Partial<UserData> = {
       devotionTime: time,
       studyPlan: studyPlan,
+      devotionPlan: devotionPlan,
       username: username,
       email: email,
       themeId: themeId,
@@ -149,6 +151,33 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
                   }`}
                 >
                   {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Devotion Plan */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-bold text-theme-muted uppercase tracking-widest mb-3">
+              <Heart className="w-4 h-4" /> Daily Devotion Theme
+            </label>
+            <div className="flex flex-col gap-2">
+              {[
+                { id: 'Faith', label: 'Faith', desc: 'Build your trust and belief in God.' },
+                { id: 'Discipline', label: 'Discipline', desc: 'Cultivate consistency and spiritual habits.' },
+                { id: 'Purpose', label: 'Purpose', desc: 'Discover and walk in your God-given calling.' }
+              ].map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setDevotionPlan(p.id as DevotionPlanType)}
+                  className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-1 ${
+                    devotionPlan === p.id 
+                      ? 'bg-theme-accent border-theme-accent text-theme-bg' 
+                      : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
+                  }`}
+                >
+                  <span className="font-bold text-sm">{p.label}</span>
+                  <span className="text-xs opacity-80">{p.desc}</span>
                 </button>
               ))}
             </div>

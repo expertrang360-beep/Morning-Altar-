@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, Clock, Timer, Mic, Bell, BookOpen, User, Mail } from 'lucide-react';
-import { StudyPlanType } from '../types';
+import { ChevronRight, Clock, Timer, Mic, Bell, BookOpen, User, Mail, Heart } from 'lucide-react';
+import { StudyPlanType, DevotionPlanType } from '../types';
 
 interface OnboardingProps {
-  onComplete: (time: string, length: number, studyPlan: StudyPlanType, username?: string, email?: string) => void;
+  onComplete: (time: string, length: number, studyPlan: StudyPlanType, username?: string, email?: string, devotionPlan?: DevotionPlanType) => void;
 }
 
 export function Onboarding({ onComplete }: OnboardingProps) {
@@ -14,6 +14,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const [time, setTime] = useState('06:00');
   const [length, setLength] = useState(10);
   const [studyPlan, setStudyPlan] = useState<StudyPlanType>('none');
+  const [devotionPlan, setDevotionPlan] = useState<DevotionPlanType>('Faith');
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [micGranted, setMicGranted] = useState(false);
 
@@ -169,6 +170,33 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       )
     },
     {
+      title: "Daily Devotion Theme",
+      description: "Select a theme for your daily devotions. You can change this later in settings.",
+      icon: <Heart className="w-16 h-16 text-theme-accent mb-8" />,
+      content: (
+        <div className="flex flex-col gap-3 w-full max-w-sm">
+          {[
+            { id: 'Faith', label: 'Faith', desc: 'Build your trust and belief in God.' },
+            { id: 'Discipline', label: 'Discipline', desc: 'Cultivate consistency and spiritual habits.' },
+            { id: 'Purpose', label: 'Purpose', desc: 'Discover and walk in your God-given calling.' }
+          ].map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setDevotionPlan(p.id as DevotionPlanType)}
+              className={`p-4 rounded-2xl border text-left transition-all flex flex-col gap-1 ${
+                devotionPlan === p.id 
+                  ? 'bg-theme-accent border-theme-accent text-theme-bg' 
+                  : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
+              }`}
+            >
+              <span className="font-bold">{p.label}</span>
+              <span className="text-sm opacity-80">{p.desc}</span>
+            </button>
+          ))}
+        </div>
+      )
+    },
+    {
       title: "Ready to Begin",
       description: "To provide the best experience, we need access to notifications and your microphone for the read-aloud feature.",
       icon: <div className="flex gap-4 mb-8">
@@ -203,7 +231,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </div>
           
           <button 
-            onClick={() => onComplete(time, length, studyPlan, username, email)}
+            onClick={() => onComplete(time, length, studyPlan, username, email, devotionPlan)}
             disabled={!notificationsGranted && !micGranted}
             className={`w-full mt-4 font-bold py-4 rounded-2xl transition-all ${
               notificationsGranted || micGranted

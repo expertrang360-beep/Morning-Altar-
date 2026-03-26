@@ -38,6 +38,13 @@ export function DevotionFlow({ devotion, streak, onComplete, onExit }: DevotionF
   const handlePlayAudio = async () => {
     if (isGeneratingAudio) return;
     
+    // Synchronously unlock audio element on user interaction
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        audioRef.current?.pause();
+      }).catch(() => {});
+    }
+    
     setIsGeneratingAudio(true);
     try {
       const textToSpeak = `${devotion.theme}. ${devotion.scripture.reference}. ${devotion.scripture.verses.join(' ')}`;
@@ -46,17 +53,13 @@ export function DevotionFlow({ devotion, streak, onComplete, onExit }: DevotionF
       if (audioData) {
         if (audioRef.current) {
           // Cleanup old URL if it was a blob URL
-          if (audioRef.current.src.startsWith('blob:')) {
+          if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {
             URL.revokeObjectURL(audioRef.current.src);
           }
           audioRef.current.src = audioData;
           audioRef.current.playbackRate = playbackSpeed;
+          audioRef.current.load();
           audioRef.current.play();
-        } else {
-          const audio = new Audio(audioData);
-          audio.playbackRate = playbackSpeed;
-          audioRef.current = audio;
-          audio.play();
         }
       }
     } catch (error) {
@@ -407,6 +410,9 @@ export function DevotionFlow({ devotion, streak, onComplete, onExit }: DevotionF
           {currentStep.content}
         </motion.div>
       </AnimatePresence>
+      
+      {/* Hidden audio element for TTS playback */}
+      <audio ref={audioRef} className="hidden" />
     </div>
   );
 }

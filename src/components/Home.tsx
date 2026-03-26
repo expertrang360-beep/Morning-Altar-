@@ -62,6 +62,13 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
   const handlePlayAudio = async (devotion: Devotion) => {
     if (isGeneratingAudio) return;
     
+    // Synchronously unlock audio element on user interaction
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        audioRef.current?.pause();
+      }).catch(() => {});
+    }
+    
     setIsGeneratingAudio(true);
     try {
       const textToSpeak = `${devotion.theme}. ${devotion.scripture.reference}. ${devotion.scripture.verses.join(' ')}`;
@@ -70,15 +77,12 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
       if (audioData) {
         if (audioRef.current) {
           // Cleanup old URL if it was a blob URL
-          if (audioRef.current.src.startsWith('blob:')) {
+          if (audioRef.current.src && audioRef.current.src.startsWith('blob:')) {
             URL.revokeObjectURL(audioRef.current.src);
           }
           audioRef.current.src = audioData;
+          audioRef.current.load();
           audioRef.current.play();
-        } else {
-          const audio = new Audio(audioData);
-          audioRef.current = audio;
-          audio.play();
         }
       }
     } catch (error) {
@@ -563,6 +567,9 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
           />
         )}
       </AnimatePresence>
+      
+      {/* Hidden audio element for TTS playback */}
+      <audio ref={audioRef} className="hidden" />
     </div>
   );
 }
