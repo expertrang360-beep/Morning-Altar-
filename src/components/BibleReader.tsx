@@ -256,6 +256,8 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
             <option value="kjv">KJV</option>
             <option value="web">WEB</option>
             <option value="bbe">BBE</option>
+            <option value="asv">ASV</option>
+            <option value="darby">Darby</option>
           </select>
           <ChevronRight className="w-3 h-3 rotate-90 text-theme-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
@@ -357,12 +359,13 @@ export function BibleReader({ onBack, initialBook, initialChapter }: BibleReader
                 <div 
                   key={v.verse} 
                   id={`verse-${v.verse}`}
-                  className="group relative pl-8 md:pl-0"
+                  onClick={() => setTargetVerse(v.verse)}
+                  className={`group relative pl-8 md:pl-0 cursor-pointer ${targetVerse === v.verse ? 'bg-theme-accent/10 rounded-xl py-2' : ''}`}
                 >
-                  <span className={`absolute left-0 md:-left-8 top-1.5 md:top-1 text-[10px] font-bold transition-all duration-500 ${isFocusMode ? 'opacity-20' : 'text-theme-muted/60 group-hover:text-theme-accent'} ${targetVerse === v.verse ? '!text-theme-accent scale-125' : ''}`}>
+                  <span className={`absolute left-0 md:-left-8 top-1.5 md:top-2 text-[10px] font-bold transition-all duration-500 ${isFocusMode ? 'opacity-20' : 'text-theme-muted/60 group-hover:text-theme-accent'} ${targetVerse === v.verse ? '!text-theme-accent scale-125' : ''}`}>
                     {v.verse}
                   </span>
-                  <p className={`leading-relaxed font-light transition-all duration-500 ${isFocusMode ? 'text-2xl leading-[1.8] text-theme-text' : 'text-xl'} ${targetVerse === v.verse ? 'text-theme-accent font-normal drop-shadow-md' : 'text-theme-text/90'}`}>
+                  <p className={`leading-relaxed font-light transition-all duration-500 ${isFocusMode ? 'text-2xl leading-[1.8] text-theme-text' : 'text-xl'} ${targetVerse === v.verse ? 'text-theme-accent font-normal' : 'text-theme-text/90'}`}>
                     {v.text}
                   </p>
                 </div>

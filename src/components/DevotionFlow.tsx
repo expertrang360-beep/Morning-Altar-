@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronRight, Mic, CheckCircle2, Volume2, Flame, Loader2, Eye, EyeOff } from 'lucide-react';
+import { X, ChevronRight, Mic, CheckCircle2, Volume2, Flame, Loader2, Eye, EyeOff, VolumeX, Music } from 'lucide-react';
 import { Devotion } from '../types';
 import { useSpeech } from '../hooks/useSpeech';
 import { generateSpeech } from '../services/ttsService';
 import { MeditationStep } from './MeditationStep';
+import { useAmbientAudio, MusicStyle } from '../hooks/useAmbientAudio';
 
 interface DevotionFlowProps {
   devotion: Devotion;
@@ -20,8 +21,19 @@ export function DevotionFlow({ devotion, streak, onComplete, onExit }: DevotionF
   const { isListening, transcript, startListening, resetTranscript } = useSpeech();
   const [isSpeechDetected, setIsSpeechDetected] = useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Map devotion theme to music style
+  const musicStyle: MusicStyle = devotion.theme.toLowerCase().includes('peace') 
+    ? 'emotional' 
+    : devotion.theme.toLowerCase().includes('joy') 
+      ? 'inspirational' 
+      : 'motivational';
+
+  useAmbientAudio(musicStyle, isMusicMuted, isPlayingAudio);
 
   useEffect(() => {
     if (transcript.length > 10) {
@@ -59,6 +71,9 @@ export function DevotionFlow({ devotion, streak, onComplete, onExit }: DevotionF
           audioRef.current.src = audioData;
           audioRef.current.playbackRate = playbackSpeed;
           audioRef.current.load();
+          
+          audioRef.current.onended = () => setIsPlayingAudio(false);
+          setIsPlayingAudio(true);
           audioRef.current.play();
         }
       }
@@ -187,7 +202,14 @@ export function DevotionFlow({ devotion, streak, onComplete, onExit }: DevotionF
             )}
             
             <div className="flex items-center justify-center gap-2">
-              <span className="text-[10px] text-theme-muted font-bold uppercase tracking-widest">Speed:</span>
+              <button
+                onClick={() => setIsMusicMuted(!isMusicMuted)}
+                className="p-2 rounded-full bg-theme-card border border-theme-border text-theme-muted hover:text-theme-accent transition-colors"
+                title={isMusicMuted ? "Unmute Background Music" : "Mute Background Music"}
+              >
+                {isMusicMuted ? <VolumeX className="w-4 h-4" /> : <Music className="w-4 h-4" />}
+              </button>
+              <span className="text-[10px] text-theme-muted font-bold uppercase tracking-widest">Speed:</span>                
               {[0.75, 1, 1.25].map(speed => (
                 <button
                   key={speed}
@@ -259,17 +281,24 @@ export function DevotionFlow({ devotion, streak, onComplete, onExit }: DevotionF
         </div>
       )
     },
-    ...(devotion.meditationScript ? [{
+    {
       id: 'meditation',
       title: 'Guided Meditation',
       content: (
         <MeditationStep 
-          script={devotion.meditationScript} 
+          script={devotion.meditationScript || [
+            'Take a moment to center yourself.',
+            `Reflect on the theme: ${devotion.theme}.`,
+            'Ask God to guide your heart and mind.',
+            'Breathe in His peace and exhale your worries.',
+            'Rest in His presence for a few moments.',
+            'When you are ready to proceed, continue.'
+          ]} 
           theme={devotion.theme}
           onComplete={handleNextStep}
         />
       )
-    }] : []),
+    },
     {
       id: 'reflection',
       title: 'Reflection',
