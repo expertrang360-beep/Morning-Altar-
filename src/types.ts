@@ -14,7 +14,7 @@ export interface Devotion {
   meditationScript?: string[];
 }
 
-export type StudyPlanType = '6months' | '1year' | '2years' | 'none';
+export type StudyPlanType = '6months' | '1year' | '2years' | 'custom' | 'none';
 export type ThemeId = 'classic' | 'dawn' | 'forest' | 'midnight' | 'sepia';
 
 export interface PrayerRequest {
@@ -41,6 +41,8 @@ export interface UserData {
   lastDevotionDate: string | null;
   studyPlan: StudyPlanType;
   studyPlanStartDate: string | null;
+  startTestament?: 'ot' | 'nt';
+  dailyCapacity?: number;
   devotionPlan?: DevotionPlanType;
   prayerRequests: PrayerRequest[];
   themeId?: ThemeId;

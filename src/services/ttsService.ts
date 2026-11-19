@@ -1,7 +1,3 @@
-import { GoogleGenAI, Modality } from "@google/genai";
-
-const API_KEY = process.env.GEMINI_API_KEY || '';
-
 /**
  * Adds a WAV header to raw PCM data.
  * Gemini TTS returns raw 16-bit PCM at 24kHz.
@@ -50,27 +46,23 @@ function addWavHeader(pcmData: Uint8Array, sampleRate: number): Uint8Array {
 }
 
 export async function generateSpeech(text: string): Promise<string | null> {
-  if (!API_KEY) {
-    console.error("GEMINI_API_KEY is not set");
-    return null;
-  }
-
   try {
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text }] }],
-      config: {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Kore' },
-          },
-        },
+    const res = await fetch('/api/tts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ text }),
     });
 
-    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (!res.ok) {
+      console.error("Failed to generate speech from server");
+      return null;
+    }
+
+    const data = await res.json();
+    const base64Audio = data.audio;
+
     if (base64Audio) {
       // Convert base64 to Uint8Array
       const binaryString = atob(base64Audio);

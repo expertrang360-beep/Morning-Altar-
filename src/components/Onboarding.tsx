@@ -2,9 +2,19 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, Clock, Timer, Mic, Bell, BookOpen, User, Mail, Heart } from 'lucide-react';
 import { StudyPlanType, DevotionPlanType } from '../types';
+import { BiblePlanSelector } from './BiblePlanSelector';
 
 interface OnboardingProps {
-  onComplete: (time: string, length: number, studyPlan: StudyPlanType, username?: string, email?: string, devotionPlan?: DevotionPlanType) => void;
+  onComplete: (
+    time: string, 
+    length: number, 
+    studyPlan: StudyPlanType, 
+    username?: string, 
+    email?: string, 
+    devotionPlan?: DevotionPlanType,
+    startTestament?: 'ot' | 'nt',
+    dailyCapacity?: number
+  ) => void;
 }
 
 export function Onboarding({ onComplete }: OnboardingProps) {
@@ -13,7 +23,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const [email, setEmail] = useState('');
   const [time, setTime] = useState('06:00');
   const [length, setLength] = useState(10);
-  const [studyPlan, setStudyPlan] = useState<StudyPlanType>('none');
+  const [studyPlan, setStudyPlan] = useState<StudyPlanType>('1year');
+  const [startTestament, setStartTestament] = useState<'ot' | 'nt'>('ot');
+  const [dailyCapacity, setDailyCapacity] = useState<number>(3);
   const [devotionPlan, setDevotionPlan] = useState<DevotionPlanType>('Faith');
   const [notificationsGranted, setNotificationsGranted] = useState(false);
   const [micGranted, setMicGranted] = useState(false);
@@ -144,28 +156,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     },
     {
       title: "Bible Study Plan",
-      description: "Would you like to follow a plan to read through the entire Bible?",
-      icon: <BookOpen className="w-16 h-16 text-theme-accent mb-8" />,
+      description: "Choose whether to begin with the Old or New Testament, and preview goal estimates based on your daily capacity.",
+      icon: <BookOpen className="w-12 h-12 text-theme-accent mb-4" />,
       content: (
-        <div className="flex flex-col gap-3 w-full max-w-sm">
-          {[
-            { id: '6months', label: '6 Months' },
-            { id: '1year', label: '1 Year' },
-            { id: '2years', label: '2 Years' },
-            { id: 'none', label: 'No Plan' }
-          ].map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setStudyPlan(p.id as StudyPlanType)}
-              className={`p-4 rounded-2xl border text-left transition-all ${
-                studyPlan === p.id 
-                  ? 'bg-theme-accent border-theme-accent text-theme-bg font-bold' 
-                  : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
+        <div className="w-full max-w-sm max-h-[52vh] overflow-y-auto px-1 pr-1 custom-scrollbar">
+          <BiblePlanSelector 
+            initialPlan={studyPlan}
+            initialStartTestament={startTestament}
+            initialDailyCapacity={dailyCapacity}
+            onSelect={(p, t, c) => {
+              setStudyPlan(p);
+              setStartTestament(t);
+              setDailyCapacity(c);
+            }}
+          />
         </div>
       )
     },
@@ -231,7 +235,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </div>
           
           <button 
-            onClick={() => onComplete(time, length, studyPlan, username, email, devotionPlan)}
+            onClick={() => onComplete(time, length, studyPlan, username, email, devotionPlan, startTestament, dailyCapacity)}
             disabled={!notificationsGranted && !micGranted}
             className={`w-full mt-4 font-bold py-4 rounded-2xl transition-all ${
               notificationsGranted || micGranted

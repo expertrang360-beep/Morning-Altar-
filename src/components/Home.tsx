@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, Flame, Play, History, Settings as SettingsIcon, Search, BookOpen, X, Volume2, Book, Loader2, Wind, Quote, Gift, BrainCircuit, CheckCircle2 } from 'lucide-react';
-import { UserData, Devotion } from '../types';
+import { UserData, Devotion, StudyPlanType } from '../types';
 import { devotions } from '../data/devotions';
 import { calculateDailyReading, calculatePlanProgress } from '../data/biblePlanHelper';
 import { christianQuotes } from '../data/quotes';
@@ -12,6 +12,7 @@ import { PrayerRequests } from './PrayerRequests';
 import { VerseOfTheDay } from './VerseOfTheDay';
 import { Rewards } from './Rewards';
 import { TriviaQuiz } from './TriviaQuiz';
+import { BiblePlanSelector } from './BiblePlanSelector';
 
 interface HomeProps {
   userData: UserData;
@@ -25,8 +26,13 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
   const isCompletedToday = userData.lastCompletedDate === new Date().toISOString().split('T')[0];
 
   const dailyReading = useMemo(() => {
-    return calculateDailyReading(userData.studyPlanStartDate, userData.studyPlan);
-  }, [userData.studyPlanStartDate, userData.studyPlan]);
+    return calculateDailyReading(
+      userData.studyPlanStartDate, 
+      userData.studyPlan, 
+      userData.startTestament || 'ot', 
+      userData.dailyCapacity || 3
+    );
+  }, [userData.studyPlanStartDate, userData.studyPlan, userData.startTestament, userData.dailyCapacity]);
 
   const dailyQuote = useMemo(() => {
     // Use the current date to pick a consistent quote for the day
@@ -35,8 +41,12 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
   }, []);
 
   const planProgress = useMemo(() => {
-    return calculatePlanProgress(userData.studyPlanStartDate, userData.studyPlan);
-  }, [userData.studyPlanStartDate, userData.studyPlan]);
+    return calculatePlanProgress(
+      userData.studyPlanStartDate, 
+      userData.studyPlan, 
+      userData.dailyCapacity || 3
+    );
+  }, [userData.studyPlanStartDate, userData.studyPlan, userData.dailyCapacity]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDevotion, setSelectedDevotion] = useState<Devotion | null>(null);
@@ -44,8 +54,30 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
   const [showSettings, setShowSettings] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
   const [showTrivia, setShowTrivia] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [tempPlan, setTempPlan] = useState<StudyPlanType>(userData.studyPlan);
+  const [tempStartTestament, setTempStartTestament] = useState<'ot' | 'nt'>(userData.startTestament || 'ot');
+  const [tempDailyCapacity, setTempDailyCapacity] = useState<number>(userData.dailyCapacity || 3);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const openPlanModal = () => {
+    setTempPlan(userData.studyPlan === 'none' ? '1year' : userData.studyPlan);
+    setTempStartTestament(userData.startTestament || 'ot');
+    setTempDailyCapacity(userData.dailyCapacity || 3);
+    setShowPlanModal(true);
+  };
+
+  const savePlanChanges = () => {
+    const isChanged = tempPlan !== userData.studyPlan || tempStartTestament !== userData.startTestament || tempDailyCapacity !== userData.dailyCapacity;
+    onUpdateUserData({
+      studyPlan: tempPlan,
+      startTestament: tempStartTestament,
+      dailyCapacity: tempDailyCapacity,
+      studyPlanStartDate: tempPlan !== 'none' ? (isChanged ? new Date().toISOString() : userData.studyPlanStartDate || new Date().toISOString()) : null,
+    });
+    setShowPlanModal(false);
+  };
 
   const getStartOfWeek = (d: Date) => {
     const date = new Date(d);
@@ -206,24 +238,42 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
             </motion.div>
           </div>
 
-          {dailyReading && planProgress && (
+          {dailyReading && planProgress ? (
             <section className="mb-8">
               <div className="flex justify-between items-center mb-4 px-1">
                 <h3 className="text-sm font-bold text-theme-muted uppercase tracking-widest flex items-center gap-2">
-                  <Book className="w-4 h-4" /> Daily Bible Reading
+                  <Book className="w-4 h-4 text-theme-accent" /> Daily Bible Reading
                 </h3>
-                <span className="text-[10px] bg-theme-accent/10 text-theme-accent px-2 py-1 rounded-full font-bold uppercase tracking-tighter">
-                  {userData.studyPlan === '6months' ? '6 Months' : userData.studyPlan === '1year' ? '1 Year' : '2 Years'} Plan
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] bg-theme-accent/10 text-theme-accent px-2 py-0.5 rounded-full font-bold uppercase tracking-tight">
+                    {userData.startTestament === 'nt' ? '✝️ NT Start' : '📜 OT Start'}
+                  </span>
+                  <button
+                    onClick={openPlanModal}
+                    className="text-[10px] text-theme-muted hover:text-theme-accent underline font-semibold transition-colors ml-1"
+                  >
+                    Adjust Pace
+                  </button>
+                </div>
               </div>
 
-              <div className="bg-theme-card/80 border border-theme-border p-6 rounded-[2rem] mb-4">
-                <div className="flex justify-between items-end mb-4">
+              {/* Progress Card */}
+              <div className="bg-theme-card/80 border border-theme-border p-6 rounded-[2rem] mb-3">
+                <div className="flex justify-between items-start mb-3">
                   <div>
-                    <p className="text-theme-muted text-xs font-medium uppercase tracking-wider mb-1">Plan Progress</p>
-                    <p className="text-lg font-bold text-theme-text">Week {planProgress.week} of {planProgress.totalWeeks}</p>
+                    <span className="text-[10px] text-theme-accent font-extrabold uppercase tracking-wider block">
+                      {userData.studyPlan === '6months' ? '6 Months Plan' : userData.studyPlan === '1year' ? '1 Year Plan' : userData.studyPlan === '2years' ? '2 Years Plan' : `${userData.dailyCapacity || 3} ch/day Plan`}
+                    </span>
+                    <p className="text-lg font-bold text-theme-text mt-0.5">
+                      Week {planProgress.week} of {planProgress.totalWeeks}
+                    </p>
                   </div>
-                  <p className="text-theme-accent font-bold text-2xl">{planProgress.percentage}%</p>
+                  <div className="text-right">
+                    <p className="text-theme-accent font-bold text-2xl">{planProgress.percentage}%</p>
+                    <span className="text-[10px] text-theme-muted">
+                      Est. Finish: {planProgress.estimatedCompletionDate}
+                    </span>
+                  </div>
                 </div>
                 <div className="h-2 w-full bg-theme-border rounded-full overflow-hidden">
                   <div 
@@ -231,24 +281,84 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
                     style={{ width: `${planProgress.percentage}%` }}
                   />
                 </div>
-                <p className="text-theme-muted text-xs mt-3 text-right">Day {planProgress.day} of {planProgress.totalDays}</p>
+                <div className="flex justify-between items-center mt-3 text-xs text-theme-muted">
+                  <span>Day {planProgress.day} of {planProgress.totalDays}</span>
+                  <span>{planProgress.chaptersRead} / 1,189 chapters</span>
+                </div>
               </div>
 
-              <button 
-                onClick={() => onNavigateBible(dailyReading.startBook, dailyReading.startChapter)}
-                className="w-full bg-theme-card/80 border border-theme-border p-6 rounded-[2rem] flex items-center justify-between hover:bg-theme-card transition-colors group"
-              >
-                <div className="text-left">
-                  <p className="text-theme-muted text-xs mb-1">Today's Portion</p>
-                  <h4 className="text-xl font-bold text-theme-text group-hover:text-theme-accent transition-colors">
-                    {dailyReading.startBook} {dailyReading.startChapter}
-                    {dailyReading.chapters.length > 1 && ` - ${dailyReading.endBook} ${dailyReading.endChapter}`}
-                  </h4>
+              {/* Today's Reading Portion Button */}
+              <div className="bg-theme-card/80 border border-theme-border p-6 rounded-[2rem] hover:border-theme-accent/40 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-left">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-theme-muted text-xs">Today's Assigned Portion</span>
+                      <span className="text-[10px] bg-theme-border text-theme-muted px-2 py-0.5 rounded font-bold">
+                        {dailyReading.testament}
+                      </span>
+                    </div>
+                    <h4 className="text-xl font-bold text-theme-text group-hover:text-theme-accent transition-colors">
+                      {dailyReading.startBook} {dailyReading.startChapter}
+                      {dailyReading.chapters.length > 1 && ` - ${dailyReading.endBook} ${dailyReading.endChapter}`}
+                    </h4>
+                  </div>
+                  <button
+                    onClick={() => onNavigateBible(dailyReading.startBook, dailyReading.startChapter)}
+                    className="w-12 h-12 rounded-2xl bg-theme-accent text-theme-bg flex items-center justify-center hover:opacity-90 transition-all shadow-md flex-shrink-0"
+                    title="Open in Bible Reader"
+                  >
+                    <BookOpen className="w-6 h-6" />
+                  </button>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-theme-accent/10 border border-theme-accent/20 flex items-center justify-center group-hover:bg-theme-accent/20 transition-colors">
-                  <BookOpen className="w-6 h-6 text-theme-accent" />
+
+                {/* Chapter chips */}
+                {dailyReading.chapters.length > 1 && (
+                  <div className="flex flex-wrap gap-1.5 pt-2 border-t border-theme-border/60">
+                    {dailyReading.chapters.map((chStr) => {
+                      const parts = chStr.split(' ');
+                      const chNum = parseInt(parts.pop() || '1');
+                      const bName = parts.join(' ');
+                      return (
+                        <button
+                          key={chStr}
+                          onClick={() => onNavigateBible(bName, chNum)}
+                          className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-theme-bg border border-theme-border text-theme-muted hover:text-theme-accent hover:border-theme-accent transition-colors"
+                        >
+                          {chStr}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </section>
+          ) : (
+            <section className="mb-8">
+              <div className="bg-gradient-to-br from-theme-card to-theme-card/40 border border-theme-accent/20 p-6 rounded-[2rem] relative overflow-hidden">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="w-2 h-2 rounded-full bg-theme-accent animate-pulse" />
+                      <span className="text-xs font-bold text-theme-accent uppercase tracking-widest">
+                        Bible Reading Plan
+                      </span>
+                    </div>
+                    <h4 className="text-lg font-bold text-theme-text mb-1">
+                      Set Your Pace & Goal
+                    </h4>
+                    <p className="text-xs text-theme-muted max-w-xs leading-relaxed mb-4">
+                      Choose to begin with the Old or New Testament, set your daily reading capacity, and view live completion estimates.
+                    </p>
+                    <button
+                      onClick={openPlanModal}
+                      className="px-5 py-2.5 bg-theme-accent text-theme-bg font-bold rounded-2xl text-xs hover:opacity-90 shadow-md transition-all flex items-center gap-2"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      <span>Set Up Reading Plan</span>
+                    </button>
+                  </div>
                 </div>
-              </button>
+              </div>
             </section>
           )}
 
@@ -568,6 +678,60 @@ export function Home({ userData, onStartDevotion, onNavigateBible, onUpdateUserD
         )}
       </AnimatePresence>
       
+      <AnimatePresence>
+        {showPlanModal && (
+          <div className="fixed inset-0 bg-theme-bg/80 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-theme-card border border-theme-border p-6 rounded-[2rem] w-full max-w-md flex flex-col max-h-[90vh] shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-4 pb-3 border-b border-theme-border flex-shrink-0">
+                <div>
+                  <h3 className="text-xl font-bold text-theme-text">Bible Reading Plan</h3>
+                  <p className="text-xs text-theme-muted">Configure starting testament and reading pace</p>
+                </div>
+                <button
+                  onClick={() => setShowPlanModal(false)}
+                  className="w-9 h-9 rounded-full bg-theme-border/50 flex items-center justify-center hover:opacity-80 transition-colors"
+                >
+                  <X className="w-5 h-5 text-theme-muted" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
+                <BiblePlanSelector
+                  initialPlan={tempPlan}
+                  initialStartTestament={tempStartTestament}
+                  initialDailyCapacity={tempDailyCapacity}
+                  onSelect={(p, t, c) => {
+                    setTempPlan(p);
+                    setTempStartTestament(t);
+                    setTempDailyCapacity(c);
+                  }}
+                />
+              </div>
+
+              <div className="pt-4 mt-3 border-t border-theme-border flex-shrink-0 flex gap-2">
+                <button
+                  onClick={() => setShowPlanModal(false)}
+                  className="flex-1 py-3 bg-theme-border text-theme-text font-bold rounded-2xl text-xs hover:opacity-80"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={savePlanChanges}
+                  className="flex-1 py-3 bg-theme-accent text-theme-bg font-bold rounded-2xl text-xs hover:opacity-90 shadow-md"
+                >
+                  Save Plan
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Hidden audio element for TTS playback */}
       <audio ref={audioRef} className="hidden" />
     </div>

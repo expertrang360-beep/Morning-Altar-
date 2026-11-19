@@ -20,6 +20,8 @@ const DEFAULT_USER_DATA: UserData = {
   lastDevotionDate: null,
   studyPlan: 'none',
   studyPlanStartDate: null,
+  startTestament: 'ot',
+  dailyCapacity: 3,
   prayerRequests: [],
   themeId: 'classic'
 };
@@ -34,6 +36,12 @@ export function useStorage() {
         if (parsed.points === undefined) {
           parsed.points = parsed.streak || 0;
         }
+        if (!parsed.startTestament) {
+          parsed.startTestament = 'ot';
+        }
+        if (!parsed.dailyCapacity) {
+          parsed.dailyCapacity = 3;
+        }
         return { ...DEFAULT_USER_DATA, ...parsed };
       } catch (e) {
         console.error("Error parsing stored user data:", e);
@@ -47,7 +55,16 @@ export function useStorage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
   }, [userData]);
 
-  const updateOnboarding = (devotionTime: string, sessionLength: number, studyPlan: StudyPlanType = 'none', username?: string, email?: string, devotionPlan?: DevotionPlanType) => {
+  const updateOnboarding = (
+    devotionTime: string, 
+    sessionLength: number, 
+    studyPlan: StudyPlanType = 'none', 
+    username?: string, 
+    email?: string, 
+    devotionPlan?: DevotionPlanType,
+    startTestament: 'ot' | 'nt' = 'ot',
+    dailyCapacity: number = 3
+  ) => {
     setUserData(prev => ({
       ...prev,
       onboarded: true,
@@ -57,15 +74,19 @@ export function useStorage() {
       sessionLength,
       studyPlan,
       studyPlanStartDate: studyPlan !== 'none' ? new Date().toISOString() : null,
-      devotionPlan: devotionPlan || prev.devotionPlan || 'Faith'
+      devotionPlan: devotionPlan || prev.devotionPlan || 'Faith',
+      startTestament,
+      dailyCapacity
     }));
   };
 
-  const updateStudyPlan = (studyPlan: StudyPlanType) => {
+  const updateStudyPlan = (studyPlan: StudyPlanType, startTestament: 'ot' | 'nt' = 'ot', dailyCapacity: number = 3) => {
     setUserData(prev => ({
       ...prev,
       studyPlan,
-      studyPlanStartDate: studyPlan !== 'none' ? new Date().toISOString() : null
+      studyPlanStartDate: studyPlan !== 'none' ? new Date().toISOString() : null,
+      startTestament,
+      dailyCapacity
     }));
   };
 

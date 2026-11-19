@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { X, Clock, Bell, BookOpen, HelpCircle, Mail, Globe, ExternalLink, ChevronRight, User, Palette, Heart } from 'lucide-react';
 import { UserData, StudyPlanType, ThemeId, DevotionPlanType } from '../types';
+import { BiblePlanSelector } from './BiblePlanSelector';
 
 interface SettingsProps {
   userData: UserData;
@@ -12,6 +13,8 @@ interface SettingsProps {
 export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
   const [time, setTime] = useState(userData.devotionTime);
   const [studyPlan, setStudyPlan] = useState<StudyPlanType>(userData.studyPlan);
+  const [startTestament, setStartTestament] = useState<'ot' | 'nt'>(userData.startTestament || 'ot');
+  const [dailyCapacity, setDailyCapacity] = useState<number>(userData.dailyCapacity || 3);
   const [devotionPlan, setDevotionPlan] = useState<DevotionPlanType>(userData.devotionPlan || 'Faith');
   const [username, setUsername] = useState(userData.username || '');
   const [email, setEmail] = useState(userData.email || '');
@@ -35,13 +38,15 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
     const updates: Partial<UserData> = {
       devotionTime: time,
       studyPlan: studyPlan,
+      startTestament: startTestament,
+      dailyCapacity: dailyCapacity,
       devotionPlan: devotionPlan,
       username: username,
       email: email,
       themeId: themeId,
     };
 
-    if (studyPlan !== userData.studyPlan) {
+    if (studyPlan !== userData.studyPlan || startTestament !== userData.startTestament || dailyCapacity !== userData.dailyCapacity) {
       updates.studyPlanStartDate = studyPlan !== 'none' ? new Date().toISOString() : null;
     }
 
@@ -130,30 +135,17 @@ export function Settings({ userData, onClose, onUpdate }: SettingsProps) {
           </div>
 
           {/* Study Plan */}
-          <div>
-            <label className="flex items-center gap-2 text-sm font-bold text-theme-muted uppercase tracking-widest mb-3">
-              <BookOpen className="w-4 h-4" /> Bible Study Plan
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { id: '6months', label: '6 Months' },
-                { id: '1year', label: '1 Year' },
-                { id: '2years', label: '2 Years' },
-                { id: 'none', label: 'No Plan' }
-              ].map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setStudyPlan(p.id as StudyPlanType)}
-                  className={`p-3 rounded-xl border text-sm transition-all ${
-                    studyPlan === p.id 
-                      ? 'bg-theme-accent border-theme-accent text-theme-bg font-bold' 
-                      : 'bg-theme-card border-theme-border text-theme-muted hover:opacity-80'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+          <div className="pt-2 border-t border-theme-border">
+            <BiblePlanSelector
+              initialPlan={studyPlan}
+              initialStartTestament={startTestament}
+              initialDailyCapacity={dailyCapacity}
+              onSelect={(p, t, c) => {
+                setStudyPlan(p);
+                setStartTestament(t);
+                setDailyCapacity(c);
+              }}
+            />
           </div>
 
           {/* Devotion Plan */}
